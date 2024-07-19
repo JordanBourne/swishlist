@@ -14,6 +14,7 @@ defmodule SwishlistWeb.WishlistLive do
       :ok,
       socket
       |> assign(:wishlist, wishlist)
+      |> assign(:selected_item, 0)
       |> stream(:items, items)
     }
   end
@@ -23,13 +24,24 @@ defmodule SwishlistWeb.WishlistLive do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
+  defp apply_action(socket, :index, _params) do
+    socket
+  end
+
   defp apply_action(socket, :add_item, _params) do
     socket
     |> assign(:item, %Item{wishlist_id: socket.assigns.wishlist.id})
   end
 
-  defp apply_action(socket, :index, _params) do
+  defp apply_action(socket, :edit_item, %{"item_id" => item_id}) do
     socket
+    |> assign(:item, Items.get_item!(item_id))
+  end
+
+  @impl true
+  def handle_event("select_item", %{"item_id" => item_id}, socket) do
+    selected = if item_id == socket.assigns.selected_item, do: 0, else: item_id
+    {:noreply, assign(socket, :selected_item, selected)}
   end
 
   @impl true

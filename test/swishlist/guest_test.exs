@@ -29,8 +29,8 @@ defmodule Swishlist.GuestTest do
       valid_attrs = %{
         first_name: "some first_name",
         last_name: "some last_name",
-        phone_number: "some phone_number",
-        email: "some email",
+        phone_number: "123-456-1234",
+        email: "valid@email.com",
         wishlist_id: wishlist.id,
         invited_by_id: user.id
       }
@@ -38,8 +38,8 @@ defmodule Swishlist.GuestTest do
       assert {:ok, %Invite{} = invite} = Guest.create_invite(valid_attrs)
       assert invite.first_name == "some first_name"
       assert invite.last_name == "some last_name"
-      assert invite.phone_number == "some phone_number"
-      assert invite.email == "some email"
+      assert invite.phone_number == "123-456-1234"
+      assert invite.email == "valid@email.com"
     end
 
     test "create_invite/1 with invalid data returns error changeset" do
@@ -52,15 +52,15 @@ defmodule Swishlist.GuestTest do
       update_attrs = %{
         first_name: "some updated first_name",
         last_name: "some updated last_name",
-        phone_number: "some updated phone_number",
-        email: "some updated email"
+        phone_number: "111-222-1234",
+        email: "updated@email.com"
       }
 
       assert {:ok, %Invite{} = invite} = Guest.update_invite(invite, update_attrs)
       assert invite.first_name == "some updated first_name"
       assert invite.last_name == "some updated last_name"
-      assert invite.phone_number == "some updated phone_number"
-      assert invite.email == "some updated email"
+      assert invite.phone_number == "111-222-1234"
+      assert invite.email == "updated@email.com"
     end
 
     test "update_invite/2 with invalid data returns error changeset" do

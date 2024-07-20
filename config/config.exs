@@ -27,8 +27,11 @@ config :swishlist, SwishlistWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :swishlist, Swishlist.Mailer, adapter: Swoosh.Adapters.Local
+config :swishlist, Swishlist.Mailer,
+  adapter: Swoosh.Adapters.Sendgrid,
+  api_key: System.get_env("SENDGRID_SECRET")
 
+config :swoosh, :api_client, Swoosh.ApiClient.Hackney
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",

@@ -1,5 +1,5 @@
 defmodule Swishlist.AccountsTest do
-  use Swishlist.DataCase
+  use Swishlist.DataCase, async: true
 
   alias Swishlist.Accounts
 

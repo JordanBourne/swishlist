@@ -8,10 +8,10 @@ defmodule Swishlist.GuestFixtures do
 
   def valid_invite_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
-      email: "some email",
+      email: "some@email.com",
       first_name: "some first_name",
       last_name: "some last_name",
-      phone_number: "some phone_number",
+      phone_number: "123-456-1234",
       invited_by_id: attrs.user.id,
       wishlist_id: attrs.wishlist.id
     })

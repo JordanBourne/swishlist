@@ -75,5 +75,7 @@ config :phoenix, :stacktrace_depth, 20
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
 
-# Disable swoosh api client as it is only required for production adapters.
+config :swishlist, Swishlist.Mailer,
+  adapter: Swoosh.Adapters.Local
+
 config :swoosh, :api_client, false

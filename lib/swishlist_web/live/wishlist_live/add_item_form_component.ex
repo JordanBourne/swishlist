@@ -55,11 +55,11 @@ defmodule SwishlistWeb.WishlistLive.AddItemFormComponent do
 
   defp save_item(socket, :add_item, item_params) do
     item_params
-      |> Map.put("wishlist_id", socket.assigns.wishlist.id)
-      |> Items.create_item()
-      |> case do
-        {:ok, item} ->
-          notify_parent({:saved, item})
+    |> Map.put("wishlist_id", socket.assigns.wishlist.id)
+    |> Items.create_item()
+    |> case do
+      {:ok, item} ->
+        notify_parent({:saved, item})
 
         {:noreply,
          socket
@@ -76,13 +76,13 @@ defmodule SwishlistWeb.WishlistLive.AddItemFormComponent do
       {:ok, item} ->
         notify_parent({:saved, item})
 
-      {:noreply,
-       socket
-       |> put_flash(:info, "Item updated successfully")
-       |> push_patch(to: socket.assigns.patch)}
+        {:noreply,
+         socket
+         |> put_flash(:info, "Item updated successfully")
+         |> push_patch(to: socket.assigns.patch)}
 
-    {:error, %Ecto.Changeset{} = changeset} ->
-      {:noreply, assign(socket, form: to_form(changeset))}
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, form: to_form(changeset))}
     end
   end
 

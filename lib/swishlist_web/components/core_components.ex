@@ -388,6 +388,8 @@ defmodule SwishlistWeb.CoreComponents do
   Renders a header with title.
   """
   attr :class, :string, default: nil
+  attr :subtitle_class, :string, default: nil
+  attr :header_class, :string, default: nil
 
   slot :inner_block, required: true
   slot :subtitle
@@ -397,10 +399,10 @@ defmodule SwishlistWeb.CoreComponents do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8 text-zinc-800">
+        <h1 class={["font-semibold leading-8 text-zinc-800", @header_class]}>
           <%= render_slot(@inner_block) %>
         </h1>
-        <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600">
+        <p :if={@subtitle != []} class={["mt-2 leading-6 text-zinc-600", @subtitle_class]}>
           <%= render_slot(@subtitle) %>
         </p>
       </div>

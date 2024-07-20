@@ -1,4 +1,4 @@
-defmodule Swishlist.List.Item do
+defmodule Swishlist.Lists.Item do
   use Ecto.Schema
   import Ecto.Changeset
 

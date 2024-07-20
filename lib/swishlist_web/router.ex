@@ -73,12 +73,12 @@ defmodule SwishlistWeb.Router do
       live "/wishlist/add-item", WishlistLive, :add_item
       live "/wishlist/edit-item/:item_id", WishlistLive, :edit_item
 
-      live "/name", ComponentLive.Index, :index
-      live "/name/new", ComponentLive.Index, :new
-      live "/name/:id/edit", ComponentLive.Index, :edit
+      live "/invites", InviteLive.Index, :index
+      live "/invites/new", InviteLive.Index, :new
+      live "/invites/:id/edit", InviteLive.Index, :edit
 
-      live "/name/:id", ComponentLive.Show, :show
-      live "/name/:id/show/edit", ComponentLive.Show, :edit
+      live "/invites/:id", InviteLive.Show, :show
+      live "/invites/:id/show/edit", InviteLive.Show, :edit
     end
   end
 

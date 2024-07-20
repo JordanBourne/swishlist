@@ -13,7 +13,12 @@ defmodule SwishlistWeb.UserWishlistLiveTest do
 
   describe "Wishlist live view" do
     @invalid_attrs %{name: nil, url: nil, price: nil}
-    @valid_attrs %{name: "some item name", url: "some url", price: "42.42", description: "some item description"}
+    @valid_attrs %{
+      name: "some item name",
+      url: "some url",
+      price: "42.42",
+      description: "some item description"
+    }
 
     @invalid_update_attrs %{name: nil}
     @valid_update_attrs %{name: "updated item name"}
@@ -80,6 +85,7 @@ defmodule SwishlistWeb.UserWishlistLiveTest do
     test "initial render includes saved wishlist items", %{conn: conn, user: user} do
       wishlist = wishlist_fixture(%{user: user, is_primary: true})
       item = item_fixture(%{wishlist: wishlist})
+
       {:ok, lv, _html} =
         conn
         |> log_in_user(user)
@@ -93,6 +99,7 @@ defmodule SwishlistWeb.UserWishlistLiveTest do
     test "wishlist owner can edit item in list", %{conn: conn, user: user} do
       wishlist = wishlist_fixture(%{user: user, is_primary: true})
       item = item_fixture(%{wishlist: wishlist})
+
       {:ok, lv, _html} =
         conn
         |> log_in_user(user)
@@ -123,15 +130,15 @@ defmodule SwishlistWeb.UserWishlistLiveTest do
     test "wishlist owner can delete item in list", %{conn: conn, user: user} do
       wishlist = wishlist_fixture(%{user: user, is_primary: true})
       item_fixture(%{wishlist: wishlist})
+
       {:ok, lv, _html} =
         conn
         |> log_in_user(user)
         |> live(~p"/wishlist")
 
       lv
-        |> element(~s|main div:fl-contains(item.name)|)
-        |> render_click()
-        |> follow_redirect(conn, ~p"/users/register")
+      |> element("section div a", "Delete")
+      |> render_click()
     end
   end
 end

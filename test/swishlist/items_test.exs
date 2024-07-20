@@ -1,7 +1,7 @@
 defmodule Swishlist.ItemsTest do
   use Swishlist.DataCase
   alias Swishlist.Items
-  alias Swishlist.List.Item
+  alias Swishlist.Lists.Item
 
   import Swishlist.ItemsFixtures
   import Swishlist.WishlistsFixtures

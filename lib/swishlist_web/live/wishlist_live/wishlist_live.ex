@@ -3,7 +3,7 @@ defmodule SwishlistWeb.WishlistLive do
 
   alias Swishlist.Wishlists
   alias Swishlist.Items
-  alias Swishlist.List.Item
+  alias Swishlist.Lists.Item
 
   @impl true
   def mount(_params, _session, %{assigns: %{current_user: user}} = socket) do
@@ -15,7 +15,7 @@ defmodule SwishlistWeb.WishlistLive do
       socket
       |> assign(:wishlist, wishlist)
       |> assign(:selected_item, 0)
-      |> stream(:items, items)
+      |> assign(:items, items)
     }
   end
 
@@ -39,13 +39,28 @@ defmodule SwishlistWeb.WishlistLive do
   end
 
   @impl true
+  def handle_event("delete_item", %{"item_id" => item_id}, socket) do
+    item_id
+    |> Items.get_item!()
+    |> Items.delete_item()
+    |> case do
+      {:ok, _} -> {:noreply, assign(socket, :items, fetch_items(socket))}
+      {:error, _changeset} -> {:noreply, socket}
+    end
+  end
+
+  @impl true
   def handle_event("select_item", %{"item_id" => item_id}, socket) do
     selected = if item_id == socket.assigns.selected_item, do: 0, else: item_id
     {:noreply, assign(socket, :selected_item, selected)}
   end
 
   @impl true
-  def handle_info({SwishlistWeb.WishlistLive.AddItemFormComponent, {:saved, item}}, socket) do
-    {:noreply, stream_insert(socket, :items, item)}
+  def handle_info({SwishlistWeb.WishlistLive.AddItemFormComponent, {:saved, _item}}, socket) do
+    {:noreply, assign(socket, :items, fetch_items(socket))}
+  end
+
+  defp fetch_items(socket) do
+    Items.list_items(socket.assigns.wishlist.id)
   end
 end

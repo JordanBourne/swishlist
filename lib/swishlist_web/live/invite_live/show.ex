@@ -1,7 +1,7 @@
-defmodule SwishlistWeb.ComponentLive.Show do
+defmodule SwishlistWeb.InviteLive.Show do
   use SwishlistWeb, :live_view
 
-  alias Swishlist.Example
+  alias Swishlist.Guest
 
   @impl true
   def mount(_params, _session, socket) do
@@ -13,9 +13,9 @@ defmodule SwishlistWeb.ComponentLive.Show do
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:component, Example.get_component!(id))}
+     |> assign(:invite, Guest.get_invite!(id))}
   end
 
-  defp page_title(:show), do: "Show Component"
-  defp page_title(:edit), do: "Edit Component"
+  defp page_title(:show), do: "Show Invite"
+  defp page_title(:edit), do: "Edit Invite"
 end

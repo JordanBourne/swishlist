@@ -1,5 +1,5 @@
 defmodule Swishlist.Items do
-  alias Swishlist.List.Item
+  alias Swishlist.Lists.Item
   alias Swishlist.Repo
   import Ecto.Query
 

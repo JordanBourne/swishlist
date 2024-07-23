@@ -50,6 +50,11 @@ defmodule SwishlistWeb.InviteLive.Index do
   end
 
   @impl true
+  def handle_info({:email, _email}, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     invite = Guest.get_invite!(id)
     {:ok, _} = Guest.delete_invite(invite)

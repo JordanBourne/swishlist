@@ -1,6 +1,7 @@
 defmodule SwishlistWeb.InviteLive.FormComponent do
   use SwishlistWeb, :live_component
 
+  alias Swishlist.Mailer
   alias Swishlist.Guest
 
   @impl true
@@ -69,6 +70,7 @@ defmodule SwishlistWeb.InviteLive.FormComponent do
   defp save_invite(socket, :new, invite_params) do
     case Guest.upsert_invite(socket.assigns.invite, invite_params) do
       {:ok, invite} ->
+        Mailer.send_invite(invite)
         notify_parent({:saved, invite})
 
         {:noreply,

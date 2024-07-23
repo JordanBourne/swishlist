@@ -1,0 +1,47 @@
+<.header class="mb-4" header_class="text-3xl" subtitle_class="text-lg">
+  <%= @wishlist.title %>
+</.header>
+
+<div class="lg:w-[60%]">
+  <div class="grid grid-cols-[75%_25%] border-b-[1px] border-slate-300">
+    <div class="px-4 pt-4 pb-1">Item name</div>
+    <div class="px-4 pt-4 pb-1">Price</div>
+  </div>
+  <%= for item <- @items do %>
+    <section
+      class="cursor-pointer grid grid-cols-[75%_25%] hover:bg-slate-100"
+      id={"item-details-" <> Integer.to_string(item.id)}
+      phx-click={JS.toggle(to: "#item-" <> Integer.to_string(item.id), display: "grid")}
+    >
+      <h3 class="p-4"><%= item.name %></h3>
+      <h3 class="p-4"><%= item.price %></h3>
+    </section>
+    <section
+      id={"item-actions-" <> Integer.to_string(item.id)}
+      class="hidden w-full px-8 grid-cols-[75%_25%] text-sm"
+    >
+      <div class="border-b-[1px] border-slate-200 py-4 pl-4">
+        <h4 class="text-xs pb-2">Description</h4>
+        <%= item.description || "-" %>
+      </div>
+      <div class="flex flex-row items-center gap-x-4 border-b-[1px] border-slate-200 py-4 pl-8">
+        <.link
+          phx-click={
+            JS.push("mark_item_purchased", value: %{item_id: item.id}) |> hide("##{item.id}")
+          }
+          data-confirm="Have you already pruchased this item?"
+        >
+          I Bought This
+        </.link>
+        <.link
+          phx-click={
+            JS.push("contribute_to_item", value: %{item_id: item.id}) |> hide("##{item.id}")
+          }
+          data-confirm="Are you sure?"
+        >
+          Contribute
+        </.link>
+      </div>
+    </section>
+  <% end %>
+</div>

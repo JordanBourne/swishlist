@@ -5,10 +5,6 @@ defmodule Swishlist.Mailer do
   alias Swishlist.Repo
   alias Swishlist.Mailer
 
-  def asdf() do
-    invite(%{})
-  end
-
   def send_invite(guest) do
     guest
     |> Repo.preload(:invited_by)

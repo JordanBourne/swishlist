@@ -79,6 +79,13 @@ defmodule SwishlistWeb.Router do
 
       live "/invites/:id", InviteLive.Show, :show
       live "/invites/:id/show/edit", InviteLive.Show, :edit
+
+      live "/gifts", GiftLive.Index, :index
+      live "/gifts/new", GiftLive.Index, :new
+      live "/gifts/:id/edit", GiftLive.Index, :edit
+
+      live "/gifts/:id", GiftLive.Show, :show
+      live "/gifts/:id/show/edit", GiftLive.Show, :edit
     end
   end
 
@@ -91,6 +98,9 @@ defmodule SwishlistWeb.Router do
       on_mount: [{SwishlistWeb.UserAuth, :mount_current_user}] do
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new
+
+      live "/wishlist/:wishlist_id", ShowWishlistLive, :index
+      live "/wishlist/:wishlist_id/:invite_id", ShowWishlistLive, :guest_view
     end
   end
 end

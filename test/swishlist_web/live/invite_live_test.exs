@@ -1,6 +1,7 @@
 defmodule SwishlistWeb.InviteLiveTest do
-  use SwishlistWeb.ConnCase
+  use SwishlistWeb.ConnCase, async: true
 
+  import Swoosh.TestAssertions
   import Phoenix.LiveViewTest
   import Swishlist.GuestFixtures
   import Swishlist.AccountsFixtures
@@ -8,14 +9,14 @@ defmodule SwishlistWeb.InviteLiveTest do
   @create_attrs %{
     first_name: "some first_name",
     last_name: "some last_name",
-    phone_number: "some phone_number",
-    email: "some email"
+    phone_number: "111-222-3333",
+    email: "test@email.com"
   }
   @update_attrs %{
     first_name: "some updated first_name",
     last_name: "some updated last_name",
-    phone_number: "some updated phone_number",
-    email: "some updated email"
+    phone_number: "111-222-4444",
+    email: "test2@email.com"
   }
   @invalid_attrs %{first_name: nil, last_name: nil, phone_number: nil, email: nil}
 
@@ -56,6 +57,15 @@ defmodule SwishlistWeb.InviteLiveTest do
       html = render(index_live)
       assert html =~ "Invite created successfully"
       assert html =~ "some first_name"
+
+      assert_email_sent(fn email ->
+        assert email.to == [{"some first_name", "test@email.com"}]
+        assert email.from == {"Support", "support@swishlist.io"}
+        assert email.subject == "You've been invited to view Tom's wishlist"
+
+        assert email.html_body ==
+                 "<h1>Check out the wishlist here: asdf.io/view-wishlist/123</h1>"
+      end)
     end
 
     test "updates invite in listing", %{conn: conn, invite: invite, user: user} do

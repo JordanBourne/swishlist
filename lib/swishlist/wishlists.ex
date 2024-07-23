@@ -42,6 +42,10 @@ defmodule Swishlist.Wishlists do
     |> create_if_not_exist(user)
   end
 
+  def get_wishlist(wishlist_id) do
+    Repo.get(Wishlist, wishlist_id)
+  end
+
   defp create_if_not_exist(wishlist, _) when is_map(wishlist), do: {:ok, wishlist}
 
   defp create_if_not_exist(_, user) do

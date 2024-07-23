@@ -1,4 +1,4 @@
-defmodule SwishlistWeb.UserWishlistLiveTest do
+defmodule SwishlistWeb.WishlistLiveTest do
   use SwishlistWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest

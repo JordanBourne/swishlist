@@ -22,5 +22,16 @@ defmodule Swishlist.WishlistsTest do
 
       assert new_wishlist.title == "Existing Primary Wishlist"
     end
+
+    test "returns wishlist for the given id" do
+      user = user_fixture()
+
+      wishlist =
+        wishlist_fixture(%{title: "Existing Primary Wishlist", user: user, is_primary: true})
+
+      new_wishlist = Wishlists.get_wishlist(wishlist.id)
+
+      assert new_wishlist.title == "Existing Primary Wishlist"
+    end
   end
 end

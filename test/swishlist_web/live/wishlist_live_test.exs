@@ -2,9 +2,9 @@ defmodule SwishlistWeb.WishlistLiveTest do
   use SwishlistWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import Swishlist.AccountsFixtures
-  import Swishlist.WishlistsFixtures
-  import Swishlist.ItemsFixtures
+  import Swishlist.AccountFixtures
+  import Swishlist.WishlistFixtures
+  import Swishlist.ItemFixtures
 
   setup do
     user = user_fixture()

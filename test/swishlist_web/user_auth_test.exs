@@ -4,7 +4,7 @@ defmodule SwishlistWeb.UserAuthTest do
   alias Phoenix.LiveView
   alias Swishlist.Accounts
   alias SwishlistWeb.UserAuth
-  import Swishlist.AccountsFixtures
+  import Swishlist.AccountFixtures
 
   @remember_me_cookie "_swishlist_web_user_remember_me"
 

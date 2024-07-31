@@ -5,12 +5,12 @@ defmodule Swishlist.MailerTest do
 
   import Swoosh.TestAssertions
   import Swishlist.GuestFixtures
-  import Swishlist.AccountsFixtures
+  import Swishlist.AccountFixtures
 
   describe "mailer" do
     test "send email to guest" do
       user = user_fixture()
-      guest = invite_fixture(%{user: user}) |> Repo.preload(:invited_by)
+      guest = guest_fixture(%{user: user}) |> Repo.preload(:invited_by)
       Mailer.send_invite(guest)
 
       assert_email_sent(fn email ->
@@ -20,7 +20,7 @@ defmodule Swishlist.MailerTest do
         assert email.subject ==
                  "You've been invited to view #{guest.invited_by.first_name}'s wishlist"
 
-        assert email.html_body == "<h1>Hello World</h1>"
+        assert email.html_body =~ "<h1>Check out the wishlist here: http://localhost:4000/view-wishlist/" <> Integer.to_string(guest.wishlist_id) <> "</h1>"
         assert email.text_body == "Text Body"
       end)
     end

@@ -1,7 +1,7 @@
-defmodule SwishlistWeb.GiftLive.Show do
+defmodule SwishlistWeb.GuestLive.Show do
   use SwishlistWeb, :live_view
 
-  alias Swishlist.Content
+  alias Swishlist.Guests
 
   @impl true
   def mount(_params, _session, socket) do
@@ -13,9 +13,9 @@ defmodule SwishlistWeb.GiftLive.Show do
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:gift, Content.get_gift!(id))}
+     |> assign(:guest, Guests.get_guest!(id))}
   end
 
-  defp page_title(:show), do: "Show Gift"
-  defp page_title(:edit), do: "Edit Gift"
+  defp page_title(:show), do: "Show Invite"
+  defp page_title(:edit), do: "Edit Invite"
 end

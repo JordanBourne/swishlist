@@ -1,7 +1,7 @@
 defmodule SwishlistWeb.UserSessionControllerTest do
   use SwishlistWeb.ConnCase, async: true
 
-  import Swishlist.AccountsFixtures
+  import Swishlist.AccountFixtures
 
   setup do
     %{user: user_fixture()}

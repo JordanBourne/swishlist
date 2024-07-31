@@ -2,7 +2,7 @@ defmodule SwishlistWeb.UserRegistrationLiveTest do
   use SwishlistWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import Swishlist.AccountsFixtures
+  import Swishlist.AccountFixtures
 
   describe "Registration page" do
     test "renders registration page", %{conn: conn} do

@@ -1,8 +1,8 @@
-defmodule SwishlistWeb.InviteLive.Index do
+defmodule SwishlistWeb.GuestLive.Index do
   use SwishlistWeb, :live_view
 
-  alias Swishlist.Guest
-  alias Swishlist.Guest.Invite
+  alias Swishlist.Guests
+  alias Swishlist.Accounts.Guest
   alias Swishlist.Wishlists
 
   @impl true
@@ -14,7 +14,7 @@ defmodule SwishlistWeb.InviteLive.Index do
       socket
       |> assign(:wishlist, wishlist)
       |> assign(:user, user)
-      |> stream(:invites, Guest.list_invites())
+      |> stream(:guests, Guests.list_guests())
     }
   end
 
@@ -26,13 +26,13 @@ defmodule SwishlistWeb.InviteLive.Index do
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
     |> assign(:page_title, "Edit Invite")
-    |> assign(:invite, Guest.get_invite!(id))
+    |> assign(:guest, Guests.get_guest!(id))
   end
 
   defp apply_action(socket, :new, _params) do
     socket
-    |> assign(:page_title, "New Invite")
-    |> assign(:invite, %Invite{
+    |> assign(:page_title, "New Guest")
+    |> assign(:guest, %Guest{
       invited_by_id: socket.assigns.user.id,
       wishlist_id: socket.assigns.wishlist.id
     })
@@ -40,13 +40,13 @@ defmodule SwishlistWeb.InviteLive.Index do
 
   defp apply_action(socket, :index, _params) do
     socket
-    |> assign(:page_title, "Listing Invites")
-    |> assign(:invite, nil)
+    |> assign(:page_title, "Listing Guest")
+    |> assign(:guest, nil)
   end
 
   @impl true
-  def handle_info({SwishlistWeb.InviteLive.FormComponent, {:saved, invite}}, socket) do
-    {:noreply, stream_insert(socket, :invites, invite)}
+  def handle_info({SwishlistWeb.GuestLive.FormComponent, {:saved, guest}}, socket) do
+    {:noreply, stream_insert(socket, :guests, guest)}
   end
 
   @impl true
@@ -55,10 +55,16 @@ defmodule SwishlistWeb.InviteLive.Index do
   end
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
-    invite = Guest.get_invite!(id)
-    {:ok, _} = Guest.delete_invite(invite)
+  def handle_info(attrs, socket) do
+    IO.inspect(attrs)
+    {:noreply, socket}
+  end
 
-    {:noreply, stream_delete(socket, :invites, invite)}
+  @impl true
+  def handle_event("delete", %{"id" => id}, socket) do
+    guest = Guests.get_guest!(id)
+    {:ok, _} = Guests.delete_guest(guest)
+
+    {:noreply, stream_delete(socket, :guests, guest)}
   end
 end

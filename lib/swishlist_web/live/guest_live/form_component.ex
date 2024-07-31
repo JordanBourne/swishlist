@@ -1,8 +1,8 @@
-defmodule SwishlistWeb.InviteLive.FormComponent do
+defmodule SwishlistWeb.GuestLive.FormComponent do
   use SwishlistWeb, :live_component
 
   alias Swishlist.Mailer
-  alias Swishlist.Guest
+  alias Swishlist.Guests
 
   @impl true
   def render(assigns) do
@@ -10,12 +10,12 @@ defmodule SwishlistWeb.InviteLive.FormComponent do
     <div>
       <.header>
         <%= @title %>
-        <:subtitle>Use this form to manage invite records in your database.</:subtitle>
+        <:subtitle>Use this form to manage guest records in your database.</:subtitle>
       </.header>
 
       <.simple_form
         for={@form}
-        id="invite-form"
+        id="guest-form"
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
@@ -33,29 +33,29 @@ defmodule SwishlistWeb.InviteLive.FormComponent do
   end
 
   @impl true
-  def update(%{invite: invite} = assigns, socket) do
+  def update(%{guest: guest} = assigns, socket) do
     {:ok,
      socket
      |> assign(assigns)
      |> assign_new(:form, fn ->
-       to_form(Guest.change_invite(invite))
+       to_form(Guests.change_guest(guest))
      end)}
   end
 
   @impl true
-  def handle_event("validate", %{"invite" => invite_params}, socket) do
-    changeset = Guest.change_invite(socket.assigns.invite, invite_params)
+  def handle_event("validate", %{"guest" => guest_params}, socket) do
+    changeset = Guests.change_guest(socket.assigns.guest, guest_params)
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
-  def handle_event("save", %{"invite" => invite_params}, socket) do
-    save_invite(socket, socket.assigns.action, invite_params)
+  def handle_event("save", %{"guest" => guest_params}, socket) do
+    save_guest(socket, socket.assigns.action, guest_params)
   end
 
-  defp save_invite(socket, :edit, invite_params) do
-    case Guest.update_invite(socket.assigns.invite, invite_params) do
-      {:ok, invite} ->
-        notify_parent({:saved, invite})
+  defp save_guest(socket, :edit, guest_params) do
+    case Guests.update_guest(socket.assigns.guest, guest_params) do
+      {:ok, guest} ->
+        notify_parent({:saved, guest})
 
         {:noreply,
          socket
@@ -67,11 +67,11 @@ defmodule SwishlistWeb.InviteLive.FormComponent do
     end
   end
 
-  defp save_invite(socket, :new, invite_params) do
-    case Guest.upsert_invite(socket.assigns.invite, invite_params) do
-      {:ok, invite} ->
-        Mailer.send_invite(invite)
-        notify_parent({:saved, invite})
+  defp save_guest(socket, :new, guest_params) do
+    case Guests.upsert_guest(socket.assigns.guest, guest_params) do
+      {:ok, guest} ->
+        Mailer.send_invite(guest)
+        notify_parent({:saved, guest})
 
         {:noreply,
          socket

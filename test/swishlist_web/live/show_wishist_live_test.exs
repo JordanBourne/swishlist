@@ -2,10 +2,10 @@ defmodule SwishlistWeb.ShowWishlistLiveTest do
   use SwishlistWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import Swishlist.AccountsFixtures
-  import Swishlist.WishlistsFixtures
+  import Swishlist.AccountFixtures
+  import Swishlist.WishlistFixtures
   import Swishlist.GuestFixtures
-  import Swishlist.ItemsFixtures
+  import Swishlist.ItemFixtures
 
   setup do
     user = user_fixture()
@@ -44,11 +44,11 @@ defmodule SwishlistWeb.ShowWishlistLiveTest do
       user: user,
       items: items
     } do
-      invite = invite_fixture(%{wishlist: wishlist, user: user})
+      guest = guest_fixture(%{wishlist: wishlist, user: user})
 
       {:ok, lv, _html} =
         conn
-        |> live(~p"/wishlist/#{wishlist.id}/#{invite.id}")
+        |> live(~p"/wishlist/#{wishlist.id}/#{guest.id}")
 
       [first_item | _tail] = items
 

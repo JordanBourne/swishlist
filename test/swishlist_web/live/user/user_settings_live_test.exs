@@ -3,7 +3,7 @@ defmodule SwishlistWeb.UserSettingsLiveTest do
 
   alias Swishlist.Accounts
   import Phoenix.LiveViewTest
-  import Swishlist.AccountsFixtures
+  import Swishlist.AccountFixtures
 
   describe "Settings page" do
     test "renders settings page", %{conn: conn} do

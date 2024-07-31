@@ -1,0 +1,34 @@
+<.header>
+  Invite <%= @guest.id %>
+  <:subtitle>This is an invite record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/invites/#{@guest}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit invite</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="First name"><%= @guest.first_name %></:item>
+  <:item title="Last name"><%= @guest.last_name %></:item>
+  <:item title="Phone number"><%= @guest.phone_number %></:item>
+  <:item title="Email"><%= @guest.email %></:item>
+</.list>
+
+<.back navigate={~p"/invites"}>Back to invites</.back>
+
+<.modal
+  :if={@live_action == :edit}
+  id="invite-modal"
+  show
+  on_cancel={JS.patch(~p"/invites/#{@guest}")}
+>
+  <.live_component
+    module={SwishlistWeb.GuestLive.FormComponent}
+    id={@guest.id}
+    title={@page_title}
+    action={@live_action}
+    guest={@guest}
+    patch={~p"/invites/#{@guest}"}
+  />
+</.modal>

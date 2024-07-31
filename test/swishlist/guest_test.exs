@@ -1,28 +1,28 @@
 defmodule Swishlist.GuestTest do
   use Swishlist.DataCase
 
-  alias Swishlist.Guest
-  import Swishlist.AccountsFixtures
-  import Swishlist.WishlistsFixtures
+  alias Swishlist.Guests
+  import Swishlist.AccountFixtures
+  import Swishlist.WishlistFixtures
 
-  describe "invites" do
-    alias Swishlist.Guest.Invite
+  describe "guests" do
+    alias Swishlist.Accounts.Guest
 
     import Swishlist.GuestFixtures
 
     @invalid_attrs %{first_name: nil, last_name: nil, phone_number: nil, email: nil}
 
-    test "list_invites/0 returns all invites" do
-      invite = invite_fixture()
-      assert Guest.list_invites() == [invite]
+    test "list_guests/0 returns all guests" do
+      guest = guest_fixture()
+      assert Guests.list_guests() == [guest]
     end
 
-    test "get_invite!/1 returns the invite with given id" do
-      invite = invite_fixture()
-      assert Guest.get_invite!(invite.id) == invite
+    test "get_guest!/1 returns the guest with given id" do
+      guest = guest_fixture()
+      assert Guests.get_guest!(guest.id) == guest
     end
 
-    test "create_invite/1 with valid data creates a invite" do
+    test "create_guest/1 with valid data creates a guest" do
       user = user_fixture()
       wishlist = wishlist_fixture(%{user: user})
 
@@ -35,19 +35,19 @@ defmodule Swishlist.GuestTest do
         invited_by_id: user.id
       }
 
-      assert {:ok, %Invite{} = invite} = Guest.create_invite(valid_attrs)
-      assert invite.first_name == "some first_name"
-      assert invite.last_name == "some last_name"
-      assert invite.phone_number == "123-456-1234"
-      assert invite.email == "valid@email.com"
+      assert {:ok, %Guest{} = guest} = Guests.create_guest(valid_attrs)
+      assert guest.first_name == "some first_name"
+      assert guest.last_name == "some last_name"
+      assert guest.phone_number == "123-456-1234"
+      assert guest.email == "valid@email.com"
     end
 
-    test "create_invite/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Guest.create_invite(@invalid_attrs)
+    test "create_guest/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Guests.create_guest(@invalid_attrs)
     end
 
-    test "update_invite/2 with valid data updates the invite" do
-      invite = invite_fixture()
+    test "update_guest/2 with valid data updates the guest" do
+      guest = guest_fixture()
 
       update_attrs = %{
         first_name: "some updated first_name",
@@ -56,28 +56,28 @@ defmodule Swishlist.GuestTest do
         email: "updated@email.com"
       }
 
-      assert {:ok, %Invite{} = invite} = Guest.update_invite(invite, update_attrs)
-      assert invite.first_name == "some updated first_name"
-      assert invite.last_name == "some updated last_name"
-      assert invite.phone_number == "111-222-1234"
-      assert invite.email == "updated@email.com"
+      assert {:ok, %Guest{} = guest} = Guests.update_guest(guest, update_attrs)
+      assert guest.first_name == "some updated first_name"
+      assert guest.last_name == "some updated last_name"
+      assert guest.phone_number == "111-222-1234"
+      assert guest.email == "updated@email.com"
     end
 
-    test "update_invite/2 with invalid data returns error changeset" do
-      invite = invite_fixture()
-      assert {:error, %Ecto.Changeset{}} = Guest.update_invite(invite, @invalid_attrs)
-      assert invite == Guest.get_invite!(invite.id)
+    test "update_guest/2 with invalid data returns error changeset" do
+      guest = guest_fixture()
+      assert {:error, %Ecto.Changeset{}} = Guests.update_guest(guest, @invalid_attrs)
+      assert guest == Guests.get_guest!(guest.id)
     end
 
-    test "delete_invite/1 deletes the invite" do
-      invite = invite_fixture()
-      assert {:ok, %Invite{}} = Guest.delete_invite(invite)
-      assert_raise Ecto.NoResultsError, fn -> Guest.get_invite!(invite.id) end
+    test "delete_guest/1 deletes the guest" do
+      guest = guest_fixture()
+      assert {:ok, %Guest{}} = Guests.delete_guest(guest)
+      assert_raise Ecto.NoResultsError, fn -> Guests.get_guest!(guest.id) end
     end
 
-    test "change_invite/1 returns a invite changeset" do
-      invite = invite_fixture()
-      assert %Ecto.Changeset{} = Guest.change_invite(invite)
+    test "change_guest/1 returns a guest changeset" do
+      guest = guest_fixture()
+      assert %Ecto.Changeset{} = Guests.change_guest(guest)
     end
   end
 end

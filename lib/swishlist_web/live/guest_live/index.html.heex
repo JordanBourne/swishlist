@@ -1,0 +1,49 @@
+<.header>
+  Listing Invites
+  <:actions>
+    <.link patch={~p"/invites/new"}>
+      <.button>New Invite</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="guests"
+  rows={@streams.guests}
+  row_click={fn {_id, guest} -> JS.navigate(~p"/invites/#{guest}") end}
+>
+  <:col :let={{_id, guest}} label="First name"><%= guest.first_name %></:col>
+  <:col :let={{_id, guest}} label="Last name"><%= guest.last_name %></:col>
+  <:col :let={{_id, guest}} label="Phone number"><%= guest.phone_number %></:col>
+  <:col :let={{_id, guest}} label="Email"><%= guest.email %></:col>
+  <:action :let={{_id, guest}}>
+    <div class="sr-only">
+      <.link navigate={~p"/invites/#{guest}"}>Show</.link>
+    </div>
+    <.link patch={~p"/invites/#{guest}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, guest}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: guest.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="guest-modal"
+  show
+  on_cancel={JS.patch(~p"/invites")}
+>
+  <.live_component
+    module={SwishlistWeb.GuestLive.FormComponent}
+    id={@guest.id || :new}
+    title={@page_title}
+    action={@live_action}
+    guest={@guest}
+    patch={~p"/invites"}
+  />
+</.modal>

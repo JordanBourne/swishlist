@@ -1,12 +1,12 @@
-defmodule Swishlist.Content do
+defmodule Swishlist.Gifts do
   @moduledoc """
-  The Content context.
+  The Gift context.
   """
 
   import Ecto.Query, warn: false
   alias Swishlist.Repo
 
-  alias Swishlist.Content.Gift
+  alias Swishlist.Lists.Gift
 
   @doc """
   Returns the list of gifts.

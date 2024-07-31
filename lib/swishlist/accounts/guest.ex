@@ -1,8 +1,8 @@
-defmodule Swishlist.Guest.Invite do
+defmodule Swishlist.Accounts.Guest do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "invites" do
+  schema "guests" do
     field :first_name, :string
     field :last_name, :string
     field :phone_number, :string

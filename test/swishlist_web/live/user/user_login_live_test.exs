@@ -2,7 +2,7 @@ defmodule SwishlistWeb.UserLoginLiveTest do
   use SwishlistWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import Swishlist.AccountsFixtures
+  import Swishlist.AccountFixtures
 
   describe "Log in page" do
     test "renders log in page", %{conn: conn} do

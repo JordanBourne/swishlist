@@ -1,8 +1,8 @@
 defmodule Swishlist.WishlistsTest do
   use Swishlist.DataCase
   alias Swishlist.Wishlists
-  import Swishlist.WishlistsFixtures
-  import Swishlist.AccountsFixtures
+  import Swishlist.WishlistFixtures
+  import Swishlist.AccountFixtures
 
   describe "find_or_create_for_user/1" do
     test "creates a new primary wishlist for the user if they did not have one" do

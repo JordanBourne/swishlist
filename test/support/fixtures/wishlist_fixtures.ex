@@ -1,10 +1,10 @@
-defmodule Swishlist.WishlistsFixtures do
+defmodule Swishlist.WishlistFixtures do
   @moduledoc """
   This module defines test helpers for creating
   entities via the `Swishlist.Wishlists` context.
   """
 
-  import Swishlist.AccountsFixtures
+  import Swishlist.AccountFixtures
 
   def valid_title, do: "Valid Wishlist Title"
   def valid_description, do: "All I want for Christmas is my two front teeth."

@@ -3,7 +3,7 @@ defmodule Swishlist.AccountsTest do
 
   alias Swishlist.Accounts
 
-  import Swishlist.AccountsFixtures
+  import Swishlist.AccountFixtures
   alias Swishlist.Accounts.{User, UserToken}
 
   describe "get_user_by_email/1" do

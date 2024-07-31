@@ -29,8 +29,8 @@ defmodule SwishlistWeb.ShowWishlistLive do
   @impl true
   def handle_event(
         "mark_item_purchased",
-        %{"item_id" => item_id},
-        %{assigns: %{"invite" => invite}} = socket
+        %{"item_id" => _item_id},
+        %{assigns: %{"invite" => _invite}} = socket
       ) do
     {:noreply,
      socket

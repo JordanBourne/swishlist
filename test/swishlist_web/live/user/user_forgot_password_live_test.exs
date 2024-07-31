@@ -2,7 +2,7 @@ defmodule SwishlistWeb.UserForgotPasswordLiveTest do
   use SwishlistWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import Swishlist.AccountsFixtures
+  import Swishlist.AccountFixtures
 
   alias Swishlist.Accounts
   alias Swishlist.Repo

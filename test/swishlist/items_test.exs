@@ -3,8 +3,8 @@ defmodule Swishlist.ItemsTest do
   alias Swishlist.Items
   alias Swishlist.Lists.Item
 
-  import Swishlist.ItemsFixtures
-  import Swishlist.WishlistsFixtures
+  import Swishlist.ItemFixtures
+  import Swishlist.WishlistFixtures
 
   describe "items" do
     @invalid_attrs %{name: nil, url: nil, price: nil}

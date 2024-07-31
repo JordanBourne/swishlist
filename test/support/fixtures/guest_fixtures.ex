@@ -3,10 +3,10 @@ defmodule Swishlist.GuestFixtures do
   This module defines test helpers for creating
   entities via the `Swishlist.Guest` context.
   """
-  import Swishlist.AccountsFixtures
-  import Swishlist.WishlistsFixtures
+  import Swishlist.AccountFixtures
+  import Swishlist.WishlistFixtures
 
-  def valid_invite_attributes(attrs \\ %{}) do
+  def valid_guest_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
       email: "some@email.com",
       first_name: "some first_name",
@@ -17,30 +17,30 @@ defmodule Swishlist.GuestFixtures do
     })
   end
 
-  def invite_fixture(attrs \\ %{})
+  def guest_fixture(attrs \\ %{})
 
-  def invite_fixture(%{wishlist: _wishlist, user: _user} = attrs) do
+  def guest_fixture(%{wishlist: _wishlist, user: _user} = attrs) do
     {:ok, invite} =
       attrs
-      |> valid_invite_attributes()
-      |> Swishlist.Guest.create_invite()
+      |> valid_guest_attributes()
+      |> Swishlist.Guests.create_guest()
 
     invite
   end
 
-  def invite_fixture(%{user: user} = attrs) do
+  def guest_fixture(%{user: user} = attrs) do
     wishlist = wishlist_fixture(%{user: user})
 
     attrs
     |> Map.put(:wishlist, wishlist)
-    |> invite_fixture()
+    |> guest_fixture()
   end
 
-  def invite_fixture(attrs) do
+  def guest_fixture(attrs) do
     user = user_fixture()
 
     attrs
     |> Map.put(:user, user)
-    |> invite_fixture()
+    |> guest_fixture()
   end
 end

@@ -20,7 +20,10 @@ defmodule Swishlist.MailerTest do
         assert email.subject ==
                  "You've been invited to view #{guest.invited_by.first_name}'s wishlist"
 
-        assert email.html_body =~ "<h1>Check out the wishlist here: http://localhost:4000/view-wishlist/" <> Integer.to_string(guest.wishlist_id) <> "</h1>"
+        assert email.html_body =~
+                 "<h1>Check out the wishlist here: http://localhost:4000/view-wishlist/" <>
+                   Integer.to_string(guest.wishlist_id) <> "</h1>"
+
         assert email.text_body == "Text Body"
       end)
     end

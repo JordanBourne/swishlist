@@ -21,7 +21,6 @@ defmodule Swishlist.Guests do
     Repo.all(Guest)
   end
 
-
   @doc """
   Gets a single guest.
 
@@ -37,6 +36,22 @@ defmodule Swishlist.Guests do
 
   """
   def get_guest!(id), do: Repo.get!(Guest, id)
+
+  @doc """
+  Gets a single guest
+
+  Returns nil if guest not found
+
+  ## Examples
+
+      iex> get_guest(123)
+      {:ok, %Guest{}}
+
+      iex> get_guest!(456)
+      {:error, %Guest{}}
+
+  """
+  def get_guest(id), do: Repo.get(Guest, id)
 
   @doc """
   Creates a guest.

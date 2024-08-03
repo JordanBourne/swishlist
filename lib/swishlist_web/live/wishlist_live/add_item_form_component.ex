@@ -56,6 +56,8 @@ defmodule SwishlistWeb.WishlistLive.AddItemFormComponent do
   defp save_item(socket, :add_item, item_params) do
     item_params
     |> Map.put("wishlist_id", socket.assigns.wishlist.id)
+    |> Map.put("user_id", socket.assigns.wishlist.user_id)
+    |> Map.put("status", "NONE")
     |> Items.create_item()
     |> case do
       {:ok, item} ->

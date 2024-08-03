@@ -9,13 +9,13 @@ defmodule Swishlist.GiftFixtures do
   import Swishlist.ItemFixtures
   import Swishlist.WishlistFixtures
 
-def gift_fixture(attrs \\ %{}) do
+  def gift_fixture(attrs \\ %{}) do
     to_user = user_fixture()
     wishlist = wishlist_fixture(%{user: to_user})
     item = item_fixture(%{wishlist: wishlist})
     from_guest = guest_fixture()
 
-    gift_attrs = 
+    gift_attrs =
       attrs
       |> Enum.into(%{
         amount: "120.5",

@@ -100,7 +100,7 @@ defmodule SwishlistWeb.Router do
       live "/users/confirm", UserConfirmationInstructionsLive, :new
 
       live "/wishlist/:wishlist_id", ShowWishlistLive, :index
-      live "/wishlist/:wishlist_id/:invite_id", ShowWishlistLive, :guest_view
+      live "/wishlist/:wishlist_id/:guest_id", ShowWishlistLive, :guest_view
     end
   end
 end

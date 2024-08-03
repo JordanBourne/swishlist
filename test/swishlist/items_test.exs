@@ -2,7 +2,10 @@ defmodule Swishlist.ItemsTest do
   use Swishlist.DataCase
   alias Swishlist.Items
   alias Swishlist.Lists.Item
+  alias Swishlist.Lists.Gift
+  alias Swishlist.Repo
 
+  import Swishlist.GuestFixtures
   import Swishlist.ItemFixtures
   import Swishlist.WishlistFixtures
 
@@ -15,7 +18,17 @@ defmodule Swishlist.ItemsTest do
     end
 
     test "create_item/1 with valid data creates a item" do
-      valid_attrs = %{name: "some name", url: "some url", price: "120.5", purchased: true}
+      wishlist = wishlist_fixture()
+
+      valid_attrs = %{
+        name: "some name",
+        url: "some url",
+        price: "120.5",
+        purchased: true,
+        status: "NONE",
+        wishlist_id: wishlist.id,
+        user_id: wishlist.user_id
+      }
 
       assert {:ok, %Item{} = item} = Items.create_item(valid_attrs)
       assert item.name == "some name"
@@ -68,6 +81,16 @@ defmodule Swishlist.ItemsTest do
       item_fixture()
 
       assert [first_item, second_item] == Items.list_items(wishlist.id)
+    end
+
+    test "mark_item_purchased_by/2 marks item purchased by a guest" do
+      item = item_fixture()
+      guest = guest_fixture()
+
+      assert {:ok, item} = Items.mark_item_purchased_by(item.id, %{guest_id: guest.id})
+      assert item.status == "PAID"
+      assert gift = Repo.get_by(Gift, %{item_id: item.id})
+      assert gift.message == "Purchased by guest"
     end
   end
 end

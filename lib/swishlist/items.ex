@@ -1,6 +1,9 @@
 defmodule Swishlist.Items do
+  alias Ecto.Multi
+  alias Swishlist.Lists.Gift
   alias Swishlist.Lists.Item
   alias Swishlist.Repo
+
   import Ecto.Query
 
   @doc """
@@ -112,5 +115,52 @@ defmodule Swishlist.Items do
   """
   def delete_item(%Item{} = item) do
     Repo.delete(item)
+  end
+
+  @doc """
+  Marks an item as purchased by given user entity
+
+  ## Examples
+
+      iex> mark_item_purchased_by(item)
+      {:ok, %Item{}}
+
+      iex> mark_item_purchased_by(item)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def mark_item_purchased_by(item_id, %{:guest_id => guest_id}) do
+    # Ecto multi
+    # Create a gift record given the item and gift and the item.user_id
+    # mark item as purchased
+    # {:ok, gift} = Swishlist.Gifts.create_gift(gift_attrs)
+    item = get_item!(item_id)
+
+    multi =
+      Multi.new()
+      |> Multi.insert(
+        :gift,
+        Gift.changeset(%Gift{}, %{
+          amount: item.price,
+          message: "Purchased by guest",
+          to_user_id: item.user_id,
+          item_id: item.id,
+          from_guest_id: guest_id
+        })
+      )
+      |> Multi.run(:item, fn _repo, _params ->
+        item = update_item(item, %{status: "PAID"})
+      end)
+
+    case Repo.transaction(multi) do
+      {:ok, %{item: item}} ->
+        {:ok, item}
+
+      {:error, :gift, changeset, _changes} ->
+        {:error, changeset}
+
+      {:error, :item, _reason, _changes} ->
+        {:error, :could_not_update_item}
+    end
   end
 end

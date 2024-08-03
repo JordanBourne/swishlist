@@ -1,8 +1,9 @@
 defmodule SwishlistWeb.ShowWishlistLive do
   use SwishlistWeb, :live_view
 
-  alias Swishlist.Wishlists
+  alias Swishlist.Guests
   alias Swishlist.Items
+  alias Swishlist.Wishlists
 
   @impl true
   def mount(
@@ -29,9 +30,12 @@ defmodule SwishlistWeb.ShowWishlistLive do
   @impl true
   def handle_event(
         "mark_item_purchased",
-        %{"item_id" => _item_id},
-        %{assigns: %{"invite" => _invite}} = socket
+        %{"item_id" => item_id},
+        %{assigns: %{:guest => guest}} = socket
       ) do
+    item_id
+    |> Items.get_item!()
+
     {:noreply,
      socket
      |> put_flash(:info, "Item marked as purchased")}
@@ -52,7 +56,11 @@ defmodule SwishlistWeb.ShowWishlistLive do
     socket
   end
 
-  defp apply_action(socket, :guest_view, _params) do
-    socket
+  defp apply_action(socket, :guest_view, %{"guest_id" => guest_id}) do
+    Guests.get_guest(guest_id)
+    |> case do
+      nil -> socket
+      guest -> socket |> assign(:guest, guest)
+    end
   end
 end

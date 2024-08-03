@@ -63,7 +63,8 @@ defmodule SwishlistWeb.GuestLiveTest do
         assert email.from == {"Support", "support@swishlist.io"}
         assert email.subject == "You've been invited to view Tom's wishlist"
 
-        assert email.html_body =~ "<h1>Check out the wishlist here: http://localhost:4000/view-wishlist/"
+        assert email.html_body =~
+                 "<h1>Check out the wishlist here: http://localhost:4000/view-wishlist/"
       end)
     end
 

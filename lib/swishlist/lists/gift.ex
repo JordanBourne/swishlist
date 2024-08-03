@@ -23,7 +23,7 @@ defmodule Swishlist.Lists.Gift do
 
   defp validate_from(changeset) do
     from_user_id = get_field(changeset, :from_user_id)
-    from_invite_id = get_field(changeset, :from_guest_id )
+    from_invite_id = get_field(changeset, :from_guest_id)
 
     if is_nil(from_user_id) and is_nil(from_invite_id) do
       add_error(changeset, :from_user_id, "No 'from' user specified")

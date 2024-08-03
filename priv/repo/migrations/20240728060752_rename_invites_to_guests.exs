@@ -12,7 +12,7 @@ defmodule Swishlist.Repo.Migrations.RenameItemsToGuests do
       add :invited_by_id, references(:users, on_delete: :nothing), null: false
       add :recipient_id, references(:users, on_delete: :nothing)
       add :wishlist_id, references(:wishlists, on_delete: :nothing), null: false
-      
+
       timestamps()
     end
   end

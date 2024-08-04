@@ -23,7 +23,7 @@ defmodule SwishlistWeb.WishlistLive.AddItemFormComponent do
         <.input field={@form[:url]} type="text" label="Url" />
         <.input field={@form[:price]} type="number" step="0.01" label="Price" />
         <:actions>
-          <.button phx-disable-with="Saving...">Save List</.button>
+          <.button phx-disable-with="Saving...">Save Item</.button>
         </:actions>
       </.simple_form>
     </div>

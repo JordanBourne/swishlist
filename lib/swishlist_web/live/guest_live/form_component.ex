@@ -10,7 +10,6 @@ defmodule SwishlistWeb.GuestLive.FormComponent do
     <div>
       <.header>
         <%= @title %>
-        <:subtitle>Use this form to manage guest records in your database.</:subtitle>
       </.header>
 
       <.simple_form
@@ -70,8 +69,14 @@ defmodule SwishlistWeb.GuestLive.FormComponent do
   defp save_guest(socket, :new, guest_params) do
     case Guests.upsert_guest(socket.assigns.guest, guest_params) do
       {:ok, guest} ->
-        Mailer.send_invite(guest)
-        notify_parent({:saved, guest})
+        case socket.assigns.invite_type do
+          "invite" ->
+            Mailer.send_signup_invite(guest)
+            notify_parent({:saved, guest})
+          _ ->
+            Mailer.send_share_invite(guest)
+            notify_parent({:saved, guest})
+        end
 
         {:noreply,
          socket

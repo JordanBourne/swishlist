@@ -1,11 +1,9 @@
-
 defmodule SwishlistWeb.GuestLive.RegisterTest do
   use SwishlistWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
   import Swishlist.AccountFixtures
   import Swishlist.GuestFixtures
-
 
   defp create_guest(_) do
     user = user_fixture()

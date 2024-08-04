@@ -5,15 +5,16 @@ defmodule Swishlist.Mailer do
   alias Swishlist.Repo
   alias Swishlist.Mailer
 
-  def send_invite(guest) do
+  def send_share_invite(guest) do
     guest
     |> Repo.preload(:invited_by)
     |> Repo.preload(:wishlist)
-    |> invite_to_wishlist()
+    |> send_email_invite_to_wishlist()
+    |> send_text_invite_to_wishlist()
     |> Mailer.deliver(domain: "swishlist.io")
   end
 
-  defp invite_to_wishlist(guest) do
+  defp send_email_invite_to_wishlist(%{email: email} = guest) when is_binary(email) do
     new()
     |> to({guest.first_name, guest.email})
     |> from({"Support", "support@swishlist.io"})
@@ -24,6 +25,18 @@ defmodule Swishlist.Mailer do
         "/view-wishlist/" <> Integer.to_string(guest.wishlist_id) <> "</h1>"
     )
     |> text_body("Text Body")
+  end
+
+  defp send_email_invite_to_wishlist(guest) do
+    guest
+  end
+
+  defp send_text_invite_to_wishlist(%{phone_number: _phone_number} = guest) do
+    guest
+  end
+
+  defp send_text_invite_to_wishlist(guest) do
+    guest
   end
 
   def send_signup_invite(guest) do

@@ -11,7 +11,7 @@ defmodule Swishlist.MailerTest do
     test "send invite to wishlist email to guest" do
       user = user_fixture()
       guest = guest_fixture(%{user: user}) |> Repo.preload(:invited_by)
-      Mailer.send_invite(guest)
+      Mailer.send_share_invite(guest)
 
       assert_email_sent(fn email ->
         assert email.to == [{guest.first_name, guest.email}]

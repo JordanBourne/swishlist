@@ -201,11 +201,12 @@ defmodule SwishlistWeb.CoreComponents do
 
       <.button>Send!</.button>
       <.button phx-click="go" class="ml-2">Send!</.button>
+      <.button outlined>Outlined Button</.button>
   """
   attr :type, :string, default: nil
   attr :class, :string, default: nil
   attr :rest, :global, include: ~w(disabled form name value)
-
+  attr :outlined, :boolean, default: false
   slot :inner_block, required: true
 
   def button(assigns) do
@@ -213,8 +214,10 @@ defmodule SwishlistWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3",
-        "text-sm font-semibold leading-6 text-white active:text-white/80",
+        "phx-submit-loading:opacity-75 rounded-lg py-2 px-3 border-2 border-zinc-900",
+        "text-sm font-semibold leading-6 active:text-opacity-80",
+        @outlined && "text-zinc-900 hover:bg-zinc-100",
+        !@outlined && "bg-zinc-900 hover:bg-zinc-700 text-white",
         @class
       ]}
       {@rest}

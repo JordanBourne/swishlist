@@ -1,9 +1,10 @@
 defmodule SwishlistWeb.WishlistLive do
   use SwishlistWeb, :live_view
 
-  alias Swishlist.Wishlists
+  alias Swishlist.Accounts.Guest
   alias Swishlist.Items
   alias Swishlist.Lists.Item
+  alias Swishlist.Wishlists
 
   @impl true
   def mount(_params, _session, %{assigns: %{current_user: user}} = socket) do
@@ -38,6 +39,26 @@ defmodule SwishlistWeb.WishlistLive do
     |> assign(:item, Items.get_item!(item_id))
   end
 
+  defp apply_action(socket, :share, _params) do
+    socket
+    |> assign(:invite_type, "share")
+    |> assign(:modal_title, "Share Swishlist")
+    |> assign(:guest, %Guest{
+      invited_by_id: socket.assigns.current_user.id,
+      wishlist_id: socket.assigns.wishlist.id
+    })
+  end
+
+  defp apply_action(socket, :invite, _params) do
+    socket
+    |> assign(:invite_type, "invite")
+    |> assign(:modal_title, "Invite a friend")
+    |> assign(:guest, %Guest{
+      invited_by_id: socket.assigns.current_user.id,
+      wishlist_id: socket.assigns.wishlist.id
+    })
+  end
+
   @impl true
   def handle_event("delete_item", %{"item_id" => item_id}, socket) do
     item_id
@@ -58,6 +79,16 @@ defmodule SwishlistWeb.WishlistLive do
   @impl true
   def handle_info({SwishlistWeb.WishlistLive.AddItemFormComponent, {:saved, _item}}, socket) do
     {:noreply, assign(socket, :items, fetch_items(socket))}
+  end
+
+  @impl true
+  def handle_info({SwishlistWeb.GuestLive.FormComponent, {:saved, _guest}}, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:email, _email}, socket) do
+    {:noreply, socket |> put_flash(:info, "Invite sent successfully")}
   end
 
   defp fetch_items(socket) do

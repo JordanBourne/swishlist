@@ -1,14 +1,18 @@
 defmodule SwishlistWeb.WishlistLiveTest do
   use SwishlistWeb.ConnCase, async: true
+  alias Swishlist.Repo
 
+  import Swoosh.TestAssertions
   import Phoenix.LiveViewTest
   import Swishlist.AccountFixtures
-  import Swishlist.WishlistFixtures
+  import Swishlist.GuestFixtures
   import Swishlist.ItemFixtures
+  import Swishlist.WishlistFixtures
 
   setup do
     user = user_fixture()
-    %{user: user}
+    guest = guest_fixture(%{user: user}) |> Repo.preload(:invited_by)
+    %{user: user, guest: guest}
   end
 
   describe "Wishlist live view" do
@@ -18,6 +22,14 @@ defmodule SwishlistWeb.WishlistLiveTest do
       url: "some url",
       price: "42.42",
       description: "some item description"
+    }
+
+    @invalid_guest_attrs %{first_name: nil, last_name: nil, phone_number: nil, email: nil}
+    @valid_guest_attrs %{
+      first_name: "some first_name",
+      last_name: "some last_name",
+      phone_number: "111-222-3333",
+      email: "test@email.com"
     }
 
     @invalid_update_attrs %{name: nil}
@@ -139,6 +151,80 @@ defmodule SwishlistWeb.WishlistLiveTest do
       lv
       |> element("section div a", "Delete")
       |> render_click()
+    end
+
+    test "send an invite to view the wishlist to new guest", %{conn: conn, user: user} do
+      {:ok, lv, _html} =
+        conn
+        |> log_in_user(user)
+        |> live(~p"/wishlist")
+
+      lv
+      |> element("a", "Share Swishlist")
+      |> render_click()
+
+      assert_patch(lv, ~p"/wishlist/share")
+
+      html = render(lv)
+      assert html =~ "Share Swishlist"
+
+      assert lv
+             |> form("#guest-form", guest: @invalid_guest_attrs)
+             |> render_change() =~ "either phone number or email must be present"
+
+      assert lv
+             |> form("#guest-form", guest: @valid_guest_attrs)
+             |> render_submit()
+
+      assert_patch(lv, ~p"/wishlist")
+
+      html = render(lv)
+      assert html =~ "Invite sent successfully"
+
+      assert_email_sent(fn email ->
+        assert email.to == [{"some first_name", "test@email.com"}]
+        assert email.from == {"Support", "support@swishlist.io"}
+        assert email.subject == "You've been invited to view Tom's wishlist"
+
+        assert email.html_body =~
+                 "<h1>Check out the wishlist here: http://localhost:4000/view-wishlist/"
+        assert email.text_body == "Text Body"
+      end)
+    end
+
+    test "send invite to a new person to create their own wishlist", %{conn: conn, user: user, guest: guest} do
+      {:ok, lv, _html} =
+        conn
+        |> log_in_user(user)
+        |> live(~p"/wishlist/invite")
+
+      lv
+      |> element("a", "Invite a Friend")
+      |> render_click()
+
+      assert_patch(lv, ~p"/wishlist/invite")
+
+      html = render(lv)
+      assert html =~ "Invite a friend"
+
+      assert lv
+             |> form("#guest-form", guest: @valid_guest_attrs)
+             |> render_submit()
+
+      assert_patch(lv, ~p"/wishlist")
+
+      html = render(lv)
+      assert html =~ "Invite sent successfully"
+
+      assert_email_sent(fn email ->
+        assert email.to == [{"some first_name", "test@email.com"}]
+        assert email.from == {"Support", "support@swishlist.io"}
+        assert email.subject == "Tom wants you to make a wishlist"
+
+        assert email.html_body =~
+                 "<h1>Make your wishlist here: http://localhost:4000/guests/register/" <>
+                   Integer.to_string(guest.wishlist_id + 1) <> "</h1>"
+      end)
     end
   end
 end

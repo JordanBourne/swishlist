@@ -12,11 +12,13 @@ defmodule SwishlistWeb.GuestLive.Register do
         socket
       ) do
     guest = Guests.get_guest!(id)
-    changeset = Accounts.change_user_registration(%User{
-      email: guest.email,
-      first_name: guest.first_name,
-      last_name: guest.last_name
-    })
+
+    changeset =
+      Accounts.change_user_registration(%User{
+        email: guest.email,
+        first_name: guest.first_name,
+        last_name: guest.last_name
+      })
 
     socket =
       socket

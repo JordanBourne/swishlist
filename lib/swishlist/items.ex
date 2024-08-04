@@ -149,7 +149,7 @@ defmodule Swishlist.Items do
         })
       )
       |> Multi.run(:item, fn _repo, _params ->
-       update_item(item, %{status: "PAID"})
+        update_item(item, %{status: "PAID"})
       end)
 
     case Repo.transaction(multi) do

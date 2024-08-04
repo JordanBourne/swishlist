@@ -32,7 +32,7 @@ defmodule SwishlistWeb.GuestLiveTest do
     test "lists all invites", %{conn: conn, guest: guest, user: user} do
       {:ok, _index_live, html} = conn |> log_in_user(user) |> live(~p"/invites")
 
-      assert html =~ "Listing Invites"
+      assert html =~ "Manage Your Invites"
       assert html =~ guest.first_name
     end
 

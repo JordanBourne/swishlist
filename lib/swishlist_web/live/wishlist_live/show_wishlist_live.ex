@@ -34,7 +34,7 @@ defmodule SwishlistWeb.ShowWishlistLive do
         %{assigns: %{:guest => guest}} = socket
       ) do
     item_id
-    |> Items.get_item!()
+    |> Items.mark_item_purchased_by(%{guest_id: guest.id})
 
     {:noreply,
      socket

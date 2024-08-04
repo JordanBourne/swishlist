@@ -58,12 +58,6 @@ defmodule SwishlistWeb.ShowWishlistLiveTest do
 
       html = render(lv)
       assert html =~ "Item marked as purchased"
-
-      # assert that the item has been marked as purchased
-      # tracking purchase status on item table
-      # NONE | FUNDING | PAID | COMPLETE
-
-      # Item Contributions table - item_id, user_id, amountq
     end
   end
 end

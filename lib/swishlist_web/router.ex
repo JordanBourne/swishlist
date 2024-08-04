@@ -56,6 +56,8 @@ defmodule SwishlistWeb.Router do
       live "/users/log_in", UserLoginLive, :new
       live "/users/reset_password", UserForgotPasswordLive, :new
       live "/users/reset_password/:token", UserResetPasswordLive, :edit
+
+      live "/guest/register/:guest_id", GuestLive.Register, :register
     end
 
     post "/users/log_in", UserSessionController, :create

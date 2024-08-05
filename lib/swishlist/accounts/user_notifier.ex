@@ -8,7 +8,7 @@ defmodule Swishlist.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Swishlist", "contact@example.com"})
+      |> from({"Swishlist", "support@swishlist.io"})
       |> subject(subject)
       |> text_body(body)
 

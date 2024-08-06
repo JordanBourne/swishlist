@@ -3,7 +3,8 @@ defmodule Swishlist.Accounts.UserNotifier do
 
   alias Swishlist.Mailer
 
-  # Delivers the email using the application mailer.
+  @spec deliver(recipient :: String.t(), subject :: String.t(), body :: String.t()) ::
+          {:ok, Swoosh.Email.t()} | :error
   defp deliver(recipient, subject, body) do
     email =
       new()
@@ -14,12 +15,31 @@ defmodule Swishlist.Accounts.UserNotifier do
 
     with {:ok, _metadata} <- Mailer.deliver(email) do
       {:ok, email}
+    else
+      _ -> :error
     end
   end
 
   @doc """
-  Deliver instructions to confirm account.
+  Sends account confirmation instructions to the user.
+
+  ## Parameters
+
+    - `user` - The user struct with an `email` field (must be `Swishlist.Accounts.User`).
+    - `url` - The URL for account confirmation (String).
+
+  ## Returns
+
+    - `{:ok, Swoosh.Email.t()}` on success.
+    - `:error` on failure.
+
+  ## Examples
+
+      iex> deliver_confirmation_instructions(%Swishlist.Accounts.User{email: "user@example.com"}, "https://example.com/confirm")
+      {:ok, %Swoosh.Email{}}
   """
+  @spec deliver_confirmation_instructions(Swishlist.Accounts.User.t(), String.t()) ::
+          {:ok, Swoosh.Email.t()} | :error
   def deliver_confirmation_instructions(user, url) do
     deliver(user.email, "Confirmation instructions", """
 
@@ -38,8 +58,25 @@ defmodule Swishlist.Accounts.UserNotifier do
   end
 
   @doc """
-  Deliver instructions to reset a user password.
+  Sends password reset instructions to the user.
+
+  ## Parameters
+
+    - `user` - The user struct with an `email` field (must be `Swishlist.Accounts.User`).
+    - `url` - The URL for password reset (String).
+
+  ## Returns
+
+    - `{:ok, Swoosh.Email.t()}` on success.
+    - `:error` on failure.
+
+  ## Examples
+
+      iex> deliver_reset_password_instructions(%Swishlist.Accounts.User{email: "user@example.com"}, "https://example.com/reset")
+      {:ok, %Swoosh.Email{}}
   """
+  @spec deliver_reset_password_instructions(Swishlist.Accounts.User.t(), String.t()) ::
+          {:ok, Swoosh.Email.t()} | :error
   def deliver_reset_password_instructions(user, url) do
     deliver(user.email, "Reset password instructions", """
 
@@ -58,8 +95,25 @@ defmodule Swishlist.Accounts.UserNotifier do
   end
 
   @doc """
-  Deliver instructions to update a user email.
+  Sends email update instructions to the user.
+
+  ## Parameters
+
+    - `user` - The user struct with an `email` field (must be `Swishlist.Accounts.User`).
+    - `url` - The URL for updating the email (String).
+
+  ## Returns
+
+    - `{:ok, Swoosh.Email.t()}` on success.
+    - `:error` on failure.
+
+  ## Examples
+
+      iex> deliver_update_email_instructions(%Swishlist.Accounts.User{email: "user@example.com"}, "https://example.com/update_email")
+      {:ok, %Swoosh.Email{}}
   """
+  @spec deliver_update_email_instructions(Swishlist.Accounts.User.t(), String.t()) ::
+          {:ok, Swoosh.Email.t()} | :error
   def deliver_update_email_instructions(user, url) do
     deliver(user.email, "Update email instructions", """
 

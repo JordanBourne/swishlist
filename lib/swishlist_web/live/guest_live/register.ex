@@ -37,34 +37,18 @@ defmodule SwishlistWeb.GuestLive.Register do
     socket
   end
 
-  # @impl true
-  # def mount(_params, _session, %{assigns: %{guest: guest}} = socket) do
-  #   changeset = Accounts.change_user_registration(%User{
-  #     email: guest.email,
-  #     first_name: guest.first_name,
-  #     last_name: guest.last_name
-  #   })
-  #
-  #   socket =
-  #     socket
-  #     |> assign(trigger_submit: false, check_errors: false)
-  #     |> assign_form(changeset)
-  #
-  #   {:ok, socket, temporary_assigns: [form: nil]}
-  # end
-
   @impl true
   def handle_event("save", %{"user" => user_params}, socket) do
     case Accounts.register_user(user_params) do
       {:ok, user} ->
-        {:ok, _} =
-          Accounts.deliver_user_confirmation_instructions(
-            user,
-            &url(~p"/users/confirm/#{&1}")
-          )
+        case Accounts.deliver_user_confirmation_instructions(user, &url(~p"/users/confirm/#{&1}")) do
+          {:ok, _} ->
+            changeset = Accounts.change_user_registration(user)
+            {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset)}
 
-        changeset = Accounts.change_user_registration(user)
-        {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset)}
+          {:error, :already_confirmed} ->
+            {:noreply, socket |> assign(trigger_submit: true)}
+        end
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, socket |> assign(check_errors: true) |> assign_form(changeset)}

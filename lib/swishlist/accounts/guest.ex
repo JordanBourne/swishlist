@@ -2,6 +2,38 @@ defmodule Swishlist.Accounts.Guest do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @moduledoc """
+  Schema and changeset functions for the `Guest` model.
+
+  ## Schema
+
+    - `first_name`: The first name of the guest.
+    - `last_name`: The last name of the guest.
+    - `phone_number`: The phone number of the guest.
+    - `email`: The email address of the guest.
+    - `invited_by`: The user who invited the guest.
+    - `recipient`: The user who is the recipient.
+    - `wishlist`: The wishlist associated with the guest.
+
+  ## Functions
+
+    - `changeset/2`: Creates and validates a changeset for the `Guest` schema.
+  """
+
+  # Type alias for Guest
+  @type t :: %__MODULE__{
+          id: integer() | nil,
+          first_name: String.t() | nil,
+          last_name: String.t() | nil,
+          phone_number: String.t() | nil,
+          email: String.t() | nil,
+          invited_by_id: integer() | nil,
+          recipient_id: integer() | nil,
+          wishlist_id: integer() | nil,
+          inserted_at: NaiveDateTime.t() | nil,
+          updated_at: NaiveDateTime.t() | nil
+        }
+
   schema "guests" do
     field :first_name, :string
     field :last_name, :string
@@ -9,12 +41,28 @@ defmodule Swishlist.Accounts.Guest do
     field :email, :string
     belongs_to :invited_by, Swishlist.Accounts.User
     belongs_to :recipient, Swishlist.Accounts.User
-    belongs_to :wishlist, Swishlist.Accounts.User
+    belongs_to :wishlist, Swishlist.Lists.Wishlist
 
     timestamps()
   end
 
-  @doc false
+  @doc """
+  Creates and validates a changeset for the `Guest` schema based on the given attributes.
+
+  ## Parameters
+
+    - `invite` - The `%Guest{}` struct or changeset.
+    - `attrs` - A map of attributes to update.
+
+  ## Examples
+
+      iex> changeset(%Guest{}, %{first_name: "John", email: "john@example.com"})
+      %Ecto.Changeset{data: %Guest{}}
+
+      iex> changeset(%Guest{}, %{first_name: "John", phone_number: "12345"})
+      %Ecto.Changeset{data: %Guest{}}
+  """
+  @spec changeset(t(), map()) :: Ecto.Changeset.t()
   def changeset(invite, attrs) do
     invite
     |> cast(attrs, [
@@ -37,8 +85,9 @@ defmodule Swishlist.Accounts.Guest do
     email = get_field(changeset, :email)
 
     if is_nil(phone_number) and is_nil(email) do
-      add_error(changeset, :phone_number, "either phone number or email must be present")
-      add_error(changeset, :email, "either phone number or email must be present")
+      changeset
+      |> add_error(:phone_number, "either phone number or email must be present")
+      |> add_error(:email, "either phone number or email must be present")
     else
       changeset
     end

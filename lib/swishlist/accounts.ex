@@ -1,11 +1,35 @@
 defmodule Swishlist.Accounts do
   @moduledoc """
   The Accounts context.
+
+  Provides functions to manage users, including registration, authentication,
+  email changes, password resets, and user confirmations.
+
+  ## Functions
+
+    * `get_user_by_email/1` - Gets a user by email.
+    * `get_user_by_email_and_password/2` - Gets a user by email and password.
+    * `get_user!/1` - Gets a single user, raising `Ecto.NoResultsError` if not found.
+    * `register_user/1` - Registers a user.
+    * `change_user_registration/2` - Returns an `%Ecto.Changeset{}` for tracking user changes.
+    * `change_user_email/2` - Returns an `%Ecto.Changeset{}` for changing the user email.
+    * `apply_user_email/3` - Emulates email change without changing it in the database.
+    * `update_user_email/2` - Updates the user email using a given token.
+    * `deliver_user_update_email_instructions/3` - Delivers email update instructions to a user.
+    * `change_user_password/2` - Returns an `%Ecto.Changeset{}` for changing the user password.
+    * `update_user_password/3` - Updates the user password.
+    * `generate_user_session_token/1` - Generates a session token.
+    * `get_user_by_session_token/1` - Gets the user with a given signed token.
+    * `delete_user_session_token/1` - Deletes a signed token with a given context.
+    * `deliver_user_confirmation_instructions/2` - Delivers confirmation email instructions to a user.
+    * `confirm_user/1` - Confirms a user by a given token.
+    * `deliver_user_reset_password_instructions/2` - Delivers reset password email to a user.
+    * `get_user_by_reset_password_token/1` - Gets the user by reset password token.
+    * `reset_user_password/2` - Resets the user password.
   """
 
   import Ecto.Query, warn: false
   alias Swishlist.Repo
-
   alias Swishlist.Accounts.{User, UserToken, UserNotifier}
 
   ## Database getters
@@ -20,8 +44,8 @@ defmodule Swishlist.Accounts do
 
       iex> get_user_by_email("unknown@example.com")
       nil
-
   """
+  @spec get_user_by_email(email :: String.t()) :: User.t() | nil
   def get_user_by_email(email) when is_binary(email) do
     Repo.get_by(User, email: email)
   end
@@ -36,8 +60,9 @@ defmodule Swishlist.Accounts do
 
       iex> get_user_by_email_and_password("foo@example.com", "invalid_password")
       nil
-
   """
+  @spec get_user_by_email_and_password(email :: String.t(), password :: String.t()) ::
+          User.t() | nil
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
     user = Repo.get_by(User, email: email)
@@ -56,8 +81,8 @@ defmodule Swishlist.Accounts do
 
       iex> get_user!(456)
       ** (Ecto.NoResultsError)
-
   """
+  @spec get_user!(id :: integer()) :: User.t()
   def get_user!(id), do: Repo.get!(User, id)
 
   ## User registration
@@ -72,8 +97,8 @@ defmodule Swishlist.Accounts do
 
       iex> register_user(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
-
   """
+  @spec register_user(attrs :: map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   def register_user(attrs) do
     %User{}
     |> User.registration_changeset(attrs)
@@ -87,8 +112,8 @@ defmodule Swishlist.Accounts do
 
       iex> change_user_registration(user)
       %Ecto.Changeset{data: %User{}}
-
   """
+  @spec change_user_registration(user :: User.t(), attrs :: map()) :: Ecto.Changeset.t()
   def change_user_registration(%User{} = user, attrs \\ %{}) do
     User.registration_changeset(user, attrs, hash_password: false, validate_email: false)
   end
@@ -102,8 +127,8 @@ defmodule Swishlist.Accounts do
 
       iex> change_user_email(user)
       %Ecto.Changeset{data: %User{}}
-
   """
+  @spec change_user_email(user :: User.t(), attrs :: map()) :: Ecto.Changeset.t()
   def change_user_email(user, attrs \\ %{}) do
     User.email_changeset(user, attrs, validate_email: false)
   end
@@ -119,8 +144,9 @@ defmodule Swishlist.Accounts do
 
       iex> apply_user_email(user, "invalid password", %{email: ...})
       {:error, %Ecto.Changeset{}}
-
   """
+  @spec apply_user_email(user :: User.t(), password :: String.t(), attrs :: map()) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   def apply_user_email(user, password, attrs) do
     user
     |> User.email_changeset(attrs)
@@ -134,6 +160,7 @@ defmodule Swishlist.Accounts do
   If the token matches, the user email is updated and the token is deleted.
   The confirmed_at date is also updated to the current time.
   """
+  @spec update_user_email(user :: User.t(), token :: String.t()) :: :ok | :error
   def update_user_email(user, token) do
     context = "change:#{user.email}"
 
@@ -146,6 +173,8 @@ defmodule Swishlist.Accounts do
     end
   end
 
+  @spec user_email_multi(user :: User.t(), email :: String.t(), context :: String.t()) ::
+          Ecto.Multi.t()
   defp user_email_multi(user, email, context) do
     changeset =
       user
@@ -164,8 +193,12 @@ defmodule Swishlist.Accounts do
 
       iex> deliver_user_update_email_instructions(user, current_email, &url(~p"/users/settings/confirm_email/#{&1}"))
       {:ok, %{to: ..., body: ...}}
-
   """
+  @spec deliver_user_update_email_instructions(
+          user :: User.t(),
+          current_email :: String.t(),
+          update_email_url_fun :: (String.t() -> String.t())
+        ) :: {:ok, Swoosh.Email.t()} | :error
   def deliver_user_update_email_instructions(%User{} = user, current_email, update_email_url_fun)
       when is_function(update_email_url_fun, 1) do
     {encoded_token, user_token} = UserToken.build_email_token(user, "change:#{current_email}")
@@ -181,8 +214,8 @@ defmodule Swishlist.Accounts do
 
       iex> change_user_password(user)
       %Ecto.Changeset{data: %User{}}
-
   """
+  @spec change_user_password(user :: User.t(), attrs :: map()) :: Ecto.Changeset.t()
   def change_user_password(user, attrs \\ %{}) do
     User.password_changeset(user, attrs, hash_password: false)
   end
@@ -197,8 +230,9 @@ defmodule Swishlist.Accounts do
 
       iex> update_user_password(user, "invalid password", %{password: ...})
       {:error, %Ecto.Changeset{}}
-
   """
+  @spec update_user_password(user :: User.t(), password :: String.t(), attrs :: map()) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   def update_user_password(user, password, attrs) do
     changeset =
       user
@@ -220,6 +254,7 @@ defmodule Swishlist.Accounts do
   @doc """
   Generates a session token.
   """
+  @spec generate_user_session_token(user :: User.t()) :: String.t()
   def generate_user_session_token(user) do
     {token, user_token} = UserToken.build_session_token(user)
     Repo.insert!(user_token)
@@ -227,16 +262,33 @@ defmodule Swishlist.Accounts do
   end
 
   @doc """
-  Gets the user with the given signed token.
+  Gets the user with the given signed session token.
+
+  ## Examples
+
+      iex> get_user_by_session_token("valid_token")
+      %User{}
+
+      iex> get_user_by_session_token("invalid_token")
+      nil
+
   """
+  @spec get_user_by_session_token(token :: String.t()) :: User.t() | nil
   def get_user_by_session_token(token) do
     {:ok, query} = UserToken.verify_session_token_query(token)
     Repo.one(query)
   end
 
   @doc """
-  Deletes the signed token with the given context.
+  Deletes the signed session token with the given context.
+
+  ## Examples
+
+      iex> delete_user_session_token("some_token")
+      :ok
+
   """
+  @spec delete_user_session_token(token :: String.t()) :: :ok
   def delete_user_session_token(token) do
     Repo.delete_all(UserToken.by_token_and_context_query(token, "session"))
     :ok
@@ -247,6 +299,9 @@ defmodule Swishlist.Accounts do
   @doc ~S"""
   Delivers the confirmation email instructions to the given user.
 
+  This function sends a confirmation email with a link that contains a token.
+  If the user is already confirmed, it returns an error.
+
   ## Examples
 
       iex> deliver_user_confirmation_instructions(user, &url(~p"/users/confirm/#{&1}"))
@@ -256,23 +311,47 @@ defmodule Swishlist.Accounts do
       {:error, :already_confirmed}
 
   """
-  def deliver_user_confirmation_instructions(%User{} = user, confirmation_url_fun)
+  @spec deliver_user_confirmation_instructions(
+          user :: User.t(),
+          confirmation_url_fun :: (String.t() -> String.t())
+        ) :: {:ok, %{to: String.t(), body: String.t()}}
+  def deliver_user_confirmation_instructions(
+        %User{confirmed_at: nil} = user,
+        confirmation_url_fun
+      )
       when is_function(confirmation_url_fun, 1) do
-    if user.confirmed_at do
-      {:error, :already_confirmed}
-    else
-      {encoded_token, user_token} = UserToken.build_email_token(user, "confirm")
-      Repo.insert!(user_token)
-      UserNotifier.deliver_confirmation_instructions(user, confirmation_url_fun.(encoded_token))
-    end
+    {encoded_token, user_token} = UserToken.build_email_token(user, "confirm")
+    Repo.insert!(user_token)
+    UserNotifier.deliver_confirmation_instructions(user, confirmation_url_fun.(encoded_token))
+  end
+
+  @spec deliver_user_confirmation_instructions(
+          user :: User.t(),
+          confirmation_url_fun :: (String.t() -> String.t())
+        ) :: {:error, :already_confirmed}
+  def deliver_user_confirmation_instructions(
+        %User{confirmed_at: _} = _user,
+        _confirmation_url_fun
+      ) do
+    {:error, :already_confirmed}
   end
 
   @doc """
   Confirms a user by the given token.
 
-  If the token matches, the user account is marked as confirmed
-  and the token is deleted.
+  If the token matches, the user's account is marked as confirmed
+  and the token is deleted. If the token is invalid, it returns an error.
+
+  ## Examples
+
+      iex> confirm_user("valid_token")
+      {:ok, %User{}}
+
+      iex> confirm_user("invalid_token")
+      :error
+
   """
+  @spec confirm_user(token :: String.t()) :: {:ok, User.t()} | :error
   def confirm_user(token) do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "confirm"),
          %User{} = user <- Repo.one(query),
@@ -294,12 +373,18 @@ defmodule Swishlist.Accounts do
   @doc ~S"""
   Delivers the reset password email to the given user.
 
+  This function sends a reset password email with a link that contains a token.
+
   ## Examples
 
       iex> deliver_user_reset_password_instructions(user, &url(~p"/users/reset_password/#{&1}"))
       {:ok, %{to: ..., body: ...}}
 
   """
+  @spec deliver_user_reset_password_instructions(
+          user :: User.t(),
+          reset_password_url_fun :: (String.t() -> String.t())
+        ) :: {:ok, Swoosh.Email.t()} | :error
   def deliver_user_reset_password_instructions(%User{} = user, reset_password_url_fun)
       when is_function(reset_password_url_fun, 1) do
     {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
@@ -310,6 +395,8 @@ defmodule Swishlist.Accounts do
   @doc """
   Gets the user by reset password token.
 
+  Returns the user associated with the token if valid, otherwise returns nil.
+
   ## Examples
 
       iex> get_user_by_reset_password_token("validtoken")
@@ -319,6 +406,7 @@ defmodule Swishlist.Accounts do
       nil
 
   """
+  @spec get_user_by_reset_password_token(token :: String.t()) :: User.t() | nil
   def get_user_by_reset_password_token(token) do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "reset_password"),
          %User{} = user <- Repo.one(query) do
@@ -331,6 +419,8 @@ defmodule Swishlist.Accounts do
   @doc """
   Resets the user password.
 
+  This function updates the user's password and removes all tokens.
+
   ## Examples
 
       iex> reset_user_password(user, %{password: "new long password", password_confirmation: "new long password"})
@@ -340,6 +430,8 @@ defmodule Swishlist.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
+  @spec reset_user_password(user :: User.t(), attrs :: map()) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   def reset_user_password(user, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))

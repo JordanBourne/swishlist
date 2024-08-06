@@ -1,10 +1,10 @@
 defmodule SwishlistWeb.WishlistLive do
   use SwishlistWeb, :live_view
 
-  alias Swishlist.Accounts.Guest
+  alias Swishlist.Wishlists
   alias Swishlist.Items
   alias Swishlist.Lists.Item
-  alias Swishlist.Wishlists
+  alias Swishlist.Accounts.Guest
 
   @impl true
   def mount(_params, _session, %{assigns: %{current_user: user}} = socket) do

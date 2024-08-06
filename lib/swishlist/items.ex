@@ -1,4 +1,19 @@
 defmodule Swishlist.Items do
+  @moduledoc """
+  Functions for interacting with items in the wishlist.
+
+  ## Functions
+
+  - `change_item/2`: Returns an Ecto changeset for tracking item changes.
+  - `list_items/0`: Returns the list of all items.
+  - `list_items/1`: Returns the list of items for a given wishlist ID.
+  - `get_item!/1`: Gets a single item by its ID.
+  - `create_item/1`: Creates a new item.
+  - `update_item/2`: Updates an existing item.
+  - `delete_item/1`: Deletes an item.
+  - `mark_item_purchased_by/2`: Marks an item as purchased by a given guest.
+  """
+
   alias Ecto.Multi
   alias Swishlist.Lists.Gift
   alias Swishlist.Lists.Item
@@ -13,8 +28,8 @@ defmodule Swishlist.Items do
 
       iex> change_item(item)
       %Ecto.Changeset{data: %Item{}}
-
   """
+  @spec change_item(Item.t(), map()) :: Ecto.Changeset.t()
   def change_item(item \\ %Item{}, attrs \\ %{}) do
     Item.changeset(item, attrs)
   end
@@ -26,21 +41,21 @@ defmodule Swishlist.Items do
 
       iex> list_items()
       [%Item{}, ...]
-
   """
+  @spec list_items() :: [Item.t()]
   def list_items do
     Repo.all(Item)
   end
 
   @doc """
-  Returns the list of items for the given wishlist id
+  Returns the list of items for the given wishlist id.
 
   ## Examples
 
       iex> list_items(wishlist_id)
       [%Item{}, ...]
-
   """
+  @spec list_items(integer()) :: [Item.t()]
   def list_items(wishlist_id) do
     query =
       from i in Item,
@@ -61,12 +76,12 @@ defmodule Swishlist.Items do
 
       iex> get_item!(456)
       ** (Ecto.NoResultsError)
-
   """
+  @spec get_item!(integer()) :: Item.t()
   def get_item!(id), do: Repo.get!(Item, id)
 
   @doc """
-  Creates a item.
+  Creates an item.
 
   ## Examples
 
@@ -75,8 +90,8 @@ defmodule Swishlist.Items do
 
       iex> create_item(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
-
   """
+  @spec create_item(map()) :: {:ok, Item.t()} | {:error, Ecto.Changeset.t()}
   def create_item(attrs \\ %{}) do
     %Item{}
     |> Item.changeset(attrs)
@@ -84,7 +99,7 @@ defmodule Swishlist.Items do
   end
 
   @doc """
-  Updates a item.
+  Updates an item.
 
   ## Examples
 
@@ -93,8 +108,8 @@ defmodule Swishlist.Items do
 
       iex> update_item(item, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
-
   """
+  @spec update_item(Item.t(), map()) :: {:ok, Item.t()} | {:error, Ecto.Changeset.t()}
   def update_item(%Item{} = item, attrs) do
     item
     |> Item.changeset(attrs)
@@ -102,7 +117,7 @@ defmodule Swishlist.Items do
   end
 
   @doc """
-  Deletes a item.
+  Deletes an item.
 
   ## Examples
 
@@ -111,14 +126,14 @@ defmodule Swishlist.Items do
 
       iex> delete_item(item)
       {:error, %Ecto.Changeset{}}
-
   """
+  @spec delete_item(Item.t()) :: {:ok, Item.t()} | {:error, Ecto.Changeset.t()}
   def delete_item(%Item{} = item) do
     Repo.delete(item)
   end
 
   @doc """
-  Marks an item as purchased by given user entity
+  Marks an item as purchased by a given guest entity.
 
   ## Examples
 
@@ -127,8 +142,9 @@ defmodule Swishlist.Items do
 
       iex> mark_item_purchased_by(item)
       {:error, %Ecto.Changeset{}}
-
   """
+  @spec mark_item_purchased_by(integer(), map()) ::
+          {:ok, Item.t()} | {:error, Ecto.Changeset.t() | atom()}
   def mark_item_purchased_by(item_id, %{:guest_id => guest_id}) do
     # Ecto multi
     # Create a gift record given the item and gift and the item.user_id

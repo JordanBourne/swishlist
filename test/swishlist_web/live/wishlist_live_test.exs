@@ -188,11 +188,12 @@ defmodule SwishlistWeb.WishlistLiveTest do
 
         assert email.html_body =~
                  "<h1>Check out the wishlist here: http://localhost:4000/view-wishlist/"
+
         assert email.text_body == "Text Body"
       end)
     end
 
-    test "send invite to a new person to create their own wishlist", %{conn: conn, user: user, guest: guest} do
+    test "send invite to a new person to create their own wishlist", %{conn: conn, user: user} do
       {:ok, lv, _html} =
         conn
         |> log_in_user(user)
@@ -222,8 +223,7 @@ defmodule SwishlistWeb.WishlistLiveTest do
         assert email.subject == "Tom wants you to make a wishlist"
 
         assert email.html_body =~
-                 "<h1>Make your wishlist here: http://localhost:4000/guests/register/" <>
-                   Integer.to_string(guest.wishlist_id + 1) <> "</h1>"
+                 "<h1>Make your wishlist here: http://localhost:4000/guests/register/"
       end)
     end
   end

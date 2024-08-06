@@ -1,11 +1,23 @@
 defmodule Swishlist.Guests do
   @moduledoc """
   The Guests context.
-  """
 
+  Provides functions to manage guests, including listing, retrieving,
+  creating, updating, and deleting guests.
+
+  ## Functions
+
+    * `list_guests/0` - Returns the list of guests.
+    * `get_guest!/1` - Gets a single guest, raising `Ecto.NoResultsError` if not found.
+    * `get_guest/1` - Gets a single guest, returning `nil` if not found.
+    * `create_guest/1` - Creates a guest.
+    * `update_guest/2` - Updates a guest.
+    * `upsert_guest/2` - Upserts a guest.
+    * `delete_guest/1` - Deletes a guest.
+    * `change_guest/2` - Returns an `%Ecto.Changeset{}` for tracking guest changes.
+  """
   import Ecto.Query, warn: false
   alias Swishlist.Repo
-
   alias Swishlist.Accounts.Guest
 
   @doc """
@@ -15,8 +27,8 @@ defmodule Swishlist.Guests do
 
       iex> list_guests()
       [%Guest{}, ...]
-
   """
+  @spec list_guests() :: [Guest.t()]
   def list_guests do
     Repo.all(Guest)
   end
@@ -33,24 +45,24 @@ defmodule Swishlist.Guests do
 
       iex> get_guest!(456)
       ** (Ecto.NoResultsError)
-
   """
+  @spec get_guest!(integer()) :: Guest.t()
   def get_guest!(id), do: Repo.get!(Guest, id)
 
   @doc """
-  Gets a single guest
+  Gets a single guest.
 
-  Returns nil if guest not found
+  Returns `nil` if the guest is not found.
 
   ## Examples
 
       iex> get_guest(123)
-      {:ok, %Guest{}}
+      %Guest{}
 
-      iex> get_guest!(456)
-      {:error, %Guest{}}
-
+      iex> get_guest(456)
+      nil
   """
+  @spec get_guest(integer()) :: Guest.t() | nil
   def get_guest(id), do: Repo.get(Guest, id)
 
   @doc """
@@ -63,8 +75,8 @@ defmodule Swishlist.Guests do
 
       iex> create_guest(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
-
   """
+  @spec create_guest(map()) :: {:ok, Guest.t()} | {:error, Ecto.Changeset.t()}
   def create_guest(attrs \\ %{}) do
     %Guest{}
     |> Guest.changeset(attrs)
@@ -81,8 +93,8 @@ defmodule Swishlist.Guests do
 
       iex> update_guest(guest, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
-
   """
+  @spec update_guest(Guest.t(), map()) :: {:ok, Guest.t()} | {:error, Ecto.Changeset.t()}
   def update_guest(%Guest{} = guest, attrs) do
     guest
     |> Guest.changeset(attrs)
@@ -99,8 +111,8 @@ defmodule Swishlist.Guests do
 
       iex> upsert_guest(guest, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
-
   """
+  @spec upsert_guest(Guest.t(), map()) :: {:ok, Guest.t()} | {:error, Ecto.Changeset.t()}
   def upsert_guest(%Guest{} = guest, attrs) do
     guest
     |> Guest.changeset(attrs)
@@ -117,8 +129,8 @@ defmodule Swishlist.Guests do
 
       iex> delete_guest(guest)
       {:error, %Ecto.Changeset{}}
-
   """
+  @spec delete_guest(Guest.t()) :: {:ok, Guest.t()} | {:error, Ecto.Changeset.t()}
   def delete_guest(%Guest{} = guest) do
     Repo.delete(guest)
   end
@@ -130,8 +142,8 @@ defmodule Swishlist.Guests do
 
       iex> change_guest(guest)
       %Ecto.Changeset{data: %Guest{}}
-
   """
+  @spec change_guest(Guest.t(), map()) :: Ecto.Changeset.t()
   def change_guest(%Guest{} = guest, attrs \\ %{}) do
     Guest.changeset(guest, attrs)
   end

@@ -3,11 +3,28 @@ defmodule Swishlist.Accounts.UserToken do
   import Ecto.Query
   alias Swishlist.Accounts.UserToken
 
+  @moduledoc """
+  A module for managing user tokens.
+
+  Provides functions to build and verify session and email tokens for
+  various contexts such as confirming accounts, resetting passwords, and
+  changing email addresses.
+  """
+
+  @type t :: %__MODULE__{
+          id: integer() | nil,
+          token: binary(),
+          sent_to: String.t() | nil,
+          context: String.t(),
+          user_id: integer(),
+          inserted_at: NaiveDateTime.t() | nil
+        }
+
+  @type token_query :: Ecto.Query.t()
+
   @hash_algorithm :sha256
   @rand_size 32
 
-  # It is very important to keep the reset password token expiry short,
-  # since someone with access to the email may take over the account.
   @reset_password_validity_in_days 1
   @confirm_validity_in_days 7
   @change_email_validity_in_days 7
@@ -23,37 +40,47 @@ defmodule Swishlist.Accounts.UserToken do
   end
 
   @doc """
-  Generates a token that will be stored in a signed place,
-  such as session or cookie. As they are signed, those
-  tokens do not need to be hashed.
+  Builds a session token and its corresponding token struct.
 
-  The reason why we store session tokens in the database, even
-  though Phoenix already provides a session cookie, is because
-  Phoenix' default session cookies are not persisted, they are
-  simply signed and potentially encrypted. This means they are
-  valid indefinitely, unless you change the signing/encryption
-  salt.
+  ## Parameters
 
-  Therefore, storing them allows individual user
-  sessions to be expired. The token system can also be extended
-  to store additional data, such as the device used for logging in.
-  You could then use this information to display all valid sessions
-  and devices in the UI and allow users to explicitly expire any
-  session they deem invalid.
+    - `user` - The user struct (must be `Swishlist.Accounts.User`).
+
+  ## Returns
+
+    - `{token :: binary(), token_struct :: %UserToken{}}`
+
+  ## Examples
+
+      iex> build_session_token(%Swishlist.Accounts.User{id: 1})
+      {<<...>> , %UserToken{token: <<...>>, context: "session", user_id: 1}}
   """
+  @spec build_session_token(Swishlist.Accounts.User.t()) :: {binary(), t()}
   def build_session_token(user) do
     token = :crypto.strong_rand_bytes(@rand_size)
     {token, %UserToken{token: token, context: "session", user_id: user.id}}
   end
 
   @doc """
-  Checks if the token is valid and returns its underlying lookup query.
-
-  The query returns the user found by the token, if any.
+  Verifies the session token and returns the corresponding query.
 
   The token is valid if it matches the value in the database and it has
-  not expired (after @session_validity_in_days).
+  not expired (after `@session_validity_in_days`).
+
+  ## Parameters
+
+    - `token` - The session token (binary).
+
+  ## Returns
+
+    - `{:ok, token_query}`
+
+  ## Examples
+
+      iex> verify_session_token_query(<<...>>)
+      {:ok, #Ecto.Query<from ...>}
   """
+  @spec verify_session_token_query(token :: binary()) :: {:ok, token_query()}
   def verify_session_token_query(token) do
     query =
       from token in by_token_and_context_query(token, "session"),
@@ -65,18 +92,26 @@ defmodule Swishlist.Accounts.UserToken do
   end
 
   @doc """
-  Builds a token and its hash to be delivered to the user's email.
+  Builds an email token and its corresponding token struct.
 
-  The non-hashed token is sent to the user email while the
-  hashed part is stored in the database. The original token cannot be reconstructed,
-  which means anyone with read-only access to the database cannot directly use
-  the token in the application to gain access. Furthermore, if the user changes
-  their email in the system, the tokens sent to the previous email are no longer
-  valid.
+  The non-hashed token is sent to the user via email, while the hashed
+  token is stored in the database.
 
-  Users can easily adapt the existing code to provide other types of delivery methods,
-  for example, by phone numbers.
+  ## Parameters
+
+    - `user` - The user struct (must be `Swishlist.Accounts.User`).
+    - `context` - The context for the token (String).
+
+  ## Returns
+
+    - `{token :: String.t(), token_struct :: %UserToken{}}`
+
+  ## Examples
+
+      iex> build_email_token(%Swishlist.Accounts.User{id: 1}, "confirm")
+      {"token_string", %UserToken{token: <<...>>, context: "confirm", sent_to: "user@example.com", user_id: 1}}
   """
+  @spec build_email_token(Swishlist.Accounts.User.t(), String.t()) :: {String.t(), t()}
   def build_email_token(user, context) do
     build_hashed_token(user, context, user.email)
   end
@@ -95,18 +130,28 @@ defmodule Swishlist.Accounts.UserToken do
   end
 
   @doc """
-  Checks if the token is valid and returns its underlying lookup query.
+  Verifies an email token and returns the corresponding query.
 
-  The query returns the user found by the token, if any.
+  The token is valid if it matches its hashed counterpart in the
+  database, the user email has not changed, and it is used within a
+  certain period based on the context.
 
-  The given token is valid if it matches its hashed counterpart in the
-  database and the user email has not changed. This function also checks
-  if the token is being used within a certain period, depending on the
-  context. The default contexts supported by this function are either
-  "confirm", for account confirmation emails, and "reset_password",
-  for resetting the password. For verifying requests to change the email,
-  see `verify_change_email_token_query/2`.
+  ## Parameters
+
+    - `token` - The email token (String).
+    - `context` - The context for the token (String).
+
+  ## Returns
+
+    - `{:ok, token_query}` or `:error`
+
+  ## Examples
+
+      iex> verify_email_token_query("token_string", "confirm")
+      {:ok, #Ecto.Query<from ...>}
   """
+  @spec verify_email_token_query(token :: String.t(), context :: String.t()) ::
+          {:ok, token_query()} | :error
   def verify_email_token_query(token, context) do
     case Base.url_decode64(token, padding: false) do
       {:ok, decoded_token} ->
@@ -130,19 +175,27 @@ defmodule Swishlist.Accounts.UserToken do
   defp days_for_context("reset_password"), do: @reset_password_validity_in_days
 
   @doc """
-  Checks if the token is valid and returns its underlying lookup query.
+  Verifies a change email token and returns the corresponding query.
 
-  The query returns the user found by the token, if any.
+  The token is valid if it matches its hashed counterpart in the
+  database and if it has not expired (after `@change_email_validity_in_days`).
 
-  This is used to validate requests to change the user
-  email. It is different from `verify_email_token_query/2` precisely because
-  `verify_email_token_query/2` validates the email has not changed, which is
-  the starting point by this function.
+  ## Parameters
 
-  The given token is valid if it matches its hashed counterpart in the
-  database and if it has not expired (after @change_email_validity_in_days).
-  The context must always start with "change:".
+    - `token` - The email token (String).
+    - `context` - The context for the token (String, must start with "change:").
+
+  ## Returns
+
+    - `{:ok, token_query}` or `:error`
+
+  ## Examples
+
+      iex> verify_change_email_token_query("token_string", "change:email")
+      {:ok, #Ecto.Query<from ...>}
   """
+  @spec verify_change_email_token_query(token :: String.t(), context :: String.t()) ::
+          {:ok, token_query()} | :error
   def verify_change_email_token_query(token, "change:" <> _ = context) do
     case Base.url_decode64(token, padding: false) do
       {:ok, decoded_token} ->
@@ -160,15 +213,49 @@ defmodule Swishlist.Accounts.UserToken do
   end
 
   @doc """
-  Returns the token struct for the given token value and context.
+  Returns a query to find tokens by token value and context.
+
+  ## Parameters
+
+    - `token` - The token value (binary).
+    - `context` - The context for the token (String).
+
+  ## Returns
+
+    - `token_query`
+
+  ## Examples
+
+      iex> by_token_and_context_query(<<...>>, "session")
+      #Ecto.Query<from ...>
   """
+  @spec by_token_and_context_query(token :: binary(), context :: String.t()) :: token_query()
   def by_token_and_context_query(token, context) do
     from UserToken, where: [token: ^token, context: ^context]
   end
 
   @doc """
-  Gets all tokens for the given user for the given contexts.
+  Returns a query to find all tokens for a user in given contexts.
+
+  ## Parameters
+
+    - `user` - The user struct (must be `Swishlist.Accounts.User`).
+    - `contexts` - List of contexts or `:all`.
+
+  ## Returns
+
+    - `token_query`
+
+  ## Examples
+
+      iex> by_user_and_contexts_query(%Swishlist.Accounts.User{id: 1}, ["confirm", "reset_password"])
+      #Ecto.Query<from ...>
   """
+  @spec by_user_and_contexts_query(
+          user :: Swishlist.Accounts.User.t(),
+          contexts :: [String.t()] | :all
+        ) ::
+          token_query()
   def by_user_and_contexts_query(user, :all) do
     from t in UserToken, where: t.user_id == ^user.id
   end

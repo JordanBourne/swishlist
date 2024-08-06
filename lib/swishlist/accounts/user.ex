@@ -2,6 +2,43 @@ defmodule Swishlist.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @moduledoc """
+  Schema and changeset functions for the `User` model.
+
+  ## Schema
+
+    - `email`: The user's email address.
+    - `first_name`: The user's first name.
+    - `last_name`: The user's last name.
+    - `password`: The user's password (virtual field).
+    - `hashed_password`: The hashed password stored in the database.
+    - `current_password`: The current password for validation (virtual field).
+    - `confirmed_at`: The timestamp when the user was confirmed.
+
+  ## Functions
+
+    - `registration_changeset/3`: Creates a changeset for user registration.
+    - `email_changeset/3`: Creates a changeset for changing the email.
+    - `password_changeset/3`: Creates a changeset for changing the password.
+    - `confirm_changeset/1`: Confirms the account by setting `confirmed_at`.
+    - `valid_password?/2`: Verifies if the provided password is correct.
+    - `validate_current_password/2`: Validates the current password.
+  """
+
+  # Type alias for User
+  @type t :: %__MODULE__{
+          id: integer() | nil,
+          email: String.t() | nil,
+          first_name: String.t() | nil,
+          last_name: String.t() | nil,
+          password: String.t() | nil,
+          hashed_password: String.t() | nil,
+          current_password: String.t() | nil,
+          confirmed_at: NaiveDateTime.t() | nil,
+          inserted_at: NaiveDateTime.t() | nil,
+          updated_at: NaiveDateTime.t() | nil
+        }
+
   schema "users" do
     field :email, :string
     field :first_name, :string
@@ -15,28 +52,34 @@ defmodule Swishlist.Accounts.User do
   end
 
   @doc """
-  A user changeset for registration.
+  Creates a user changeset for registration.
 
-  It is important to validate the length of both email and password.
-  Otherwise databases may truncate the email without warnings, which
-  could lead to unpredictable or insecure behaviour. Long passwords may
-  also be very expensive to hash for certain algorithms.
+  ## Parameters
+
+    - `user` - The `%User{}` struct or changeset.
+    - `attrs` - A map of attributes to update.
+    - `opts` - Options for password hashing and email validation.
 
   ## Options
 
-    * `:hash_password` - Hashes the password so it can be stored securely
-      in the database and ensures the password field is cleared to prevent
-      leaks in the logs. If password hashing is not needed and clearing the
-      password field is not desired (like when using this changeset for
-      validations on a LiveView form), this option can be set to `false`.
-      Defaults to `true`.
+    * `:hash_password` - Whether to hash the password. Defaults to `true`.
+    * `:validate_email` - Whether to validate email uniqueness. Defaults to `true`.
 
-    * `:validate_email` - Validates the uniqueness of the email, in case
-      you don't want to validate the uniqueness of the email (like when
-      using this changeset for validations on a LiveView form before
-      submitting the form), this option can be set to `false`.
-      Defaults to `true`.
+  ## Examples
+
+      iex> registration_changeset(%User{}, %{email: "user@example.com", password: "password123"})
+      %Ecto.Changeset{data: %User{}}
+
+      iex> registration_changeset(%User{}, %{email: "user@example.com"})
+      %Ecto.Changeset{data: %User{}}
   """
+  @spec registration_changeset(
+          t(),
+          map(),
+          [
+            {:hash_password, boolean()} | {:validate_email, boolean()}
+          ]
+        ) :: Ecto.Changeset.t()
   def registration_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:email, :password, :first_name, :last_name])
@@ -56,10 +99,6 @@ defmodule Swishlist.Accounts.User do
     changeset
     |> validate_required([:password])
     |> validate_length(:password, min: 12, max: 72)
-    # Examples of additional password validation:
-    # |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
-    # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
-    # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
     |> maybe_hash_password(opts)
   end
 
@@ -69,10 +108,7 @@ defmodule Swishlist.Accounts.User do
 
     if hash_password? && password && changeset.valid? do
       changeset
-      # If using Bcrypt, then further validate it is at most 72 bytes long
       |> validate_length(:password, max: 72, count: :bytes)
-      # Hashing could be done with `Ecto.Changeset.prepare_changes/2`, but that
-      # would keep the database transaction open longer and hurt performance.
       |> put_change(:hashed_password, Bcrypt.hash_pwd_salt(password))
       |> delete_change(:password)
     else
@@ -91,10 +127,25 @@ defmodule Swishlist.Accounts.User do
   end
 
   @doc """
-  A user changeset for changing the email.
+  Creates a user changeset for changing the email.
 
-  It requires the email to change otherwise an error is added.
+  Requires that the email field is changed; otherwise, an error is added.
+
+  ## Parameters
+
+    - `user` - The `%User{}` struct or changeset.
+    - `attrs` - A map of attributes to update.
+    - `opts` - Options for email validation.
+
+  ## Examples
+
+      iex> email_changeset(%User{}, %{email: "new_email@example.com"})
+      %Ecto.Changeset{data: %User{}}
+
+      iex> email_changeset(%User{}, %{})
+      %Ecto.Changeset{data: %User{}}
   """
+  @spec email_changeset(t(), map(), keyword()) :: Ecto.Changeset.t()
   def email_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:email])
@@ -106,17 +157,24 @@ defmodule Swishlist.Accounts.User do
   end
 
   @doc """
-  A user changeset for changing the password.
+  Creates a user changeset for changing the password.
+
+  ## Parameters
+
+    - `user` - The `%User{}` struct or changeset.
+    - `attrs` - A map of attributes to update.
+    - `opts` - Options for password validation and hashing.
 
   ## Options
 
-    * `:hash_password` - Hashes the password so it can be stored securely
-      in the database and ensures the password field is cleared to prevent
-      leaks in the logs. If password hashing is not needed and clearing the
-      password field is not desired (like when using this changeset for
-      validations on a LiveView form), this option can be set to `false`.
-      Defaults to `true`.
+    * `:hash_password` - Whether to hash the password. Defaults to `true`.
+
+  ## Examples
+
+      iex> password_changeset(%User{}, %{password: "new_password123"})
+      %Ecto.Changeset{data: %User{}}
   """
+  @spec password_changeset(t(), map(), keyword()) :: Ecto.Changeset.t()
   def password_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:password])
@@ -125,19 +183,35 @@ defmodule Swishlist.Accounts.User do
   end
 
   @doc """
-  Confirms the account by setting `confirmed_at`.
+  Confirms the account by setting `confirmed_at` to the current timestamp.
+
+  ## Examples
+
+      iex> confirm_changeset(%User{})
+      %Ecto.Changeset{data: %User{}}
   """
+  @spec confirm_changeset(t() | Ecto.Changeset.t()) :: Ecto.Changeset.t()
   def confirm_changeset(user) do
     now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
     change(user, confirmed_at: now)
   end
 
   @doc """
-  Verifies the password.
+  Verifies the password against the hashed password.
 
-  If there is no user or the user doesn't have a password, we call
-  `Bcrypt.no_user_verify/0` to avoid timing attacks.
+  If there is no user or the user doesn't have a password, avoids timing attacks.
+
+  ## Parameters
+
+    - `user` - The `%User{}` struct.
+    - `password` - The password to verify.
+
+  ## Examples
+
+      iex> valid_password?(%User{hashed_password: "hashed_password"}, "password")
+      true
   """
+  @spec valid_password?(t(), <<_::8, _::_*8>>) :: boolean()
   def valid_password?(%Swishlist.Accounts.User{hashed_password: hashed_password}, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
     Bcrypt.verify_pass(password, hashed_password)
@@ -149,8 +223,22 @@ defmodule Swishlist.Accounts.User do
   end
 
   @doc """
-  Validates the current password otherwise adds an error to the changeset.
+  Validates the current password and adds an error to the changeset if invalid.
+
+  ## Parameters
+
+    - `changeset` - The `%Ecto.Changeset{}` struct.
+    - `password` - The current password to validate.
+
+  ## Examples
+
+      iex> validate_current_password(%Ecto.Changeset{data: %User{hashed_password: "hashed_password"}}, "password")
+      %Ecto.Changeset{valid?: true}
+
+      iex> validate_current_password(%Ecto.Changeset{data: %User{hashed_password: "hashed_password"}}, "wrong_password")
+      %Ecto.Changeset{valid?: false}
   """
+  @spec validate_current_password(Ecto.Changeset.t(), String.t()) :: Ecto.Changeset.t()
   def validate_current_password(changeset, password) do
     changeset = cast(changeset, %{current_password: password}, [:current_password])
 

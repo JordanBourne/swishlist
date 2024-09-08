@@ -11,7 +11,7 @@ import Config
 # before starting your production server.
 config :swishlist, SwishlistWeb.Endpoint,
   url: [host: "swishlist.io", port: 443],
-  check_origin: ["https://swishlist.io"],
+  check_origin: ["https://swishlist.io", "https://www.swishlist.io"],
   cache_static_manifest: "priv/static/cache_manifest.json"
 
 # Configures Swoosh API Client

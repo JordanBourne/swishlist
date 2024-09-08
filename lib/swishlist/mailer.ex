@@ -90,7 +90,7 @@ defmodule Swishlist.Mailer do
     |> html_body(
       "<h1>Make your wishlist here: " <>
         System.get_env("BASE_URL") <>
-        "/guests/register/" <> Integer.to_string(guest.wishlist_id) <> "</h1>"
+        "/guest/register/" <> Integer.to_string(guest.wishlist_id) <> "</h1>"
     )
     |> text_body("Text Body")
   end

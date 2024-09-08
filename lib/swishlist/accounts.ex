@@ -442,4 +442,9 @@ defmodule Swishlist.Accounts do
       {:error, :user, changeset, _} -> {:error, changeset}
     end
   end
+
+  @spec get_user_payment_account(user :: User.t()) :: :ok
+  def get_user_payment_account(user) do
+    MoovElixirSdk.health()
+  end
 end

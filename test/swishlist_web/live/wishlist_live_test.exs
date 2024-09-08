@@ -223,7 +223,7 @@ defmodule SwishlistWeb.WishlistLiveTest do
         assert email.subject == "Tom wants you to make a wishlist"
 
         assert email.html_body =~
-                 "<h1>Make your wishlist here: http://localhost:4000/guests/register/"
+                 "<h1>Make your wishlist here: http://localhost:4000/guest/register/"
       end)
     end
   end

@@ -33,3 +33,6 @@ config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :moov_elixir_sdk,
+  api_key: System.get_env("MOOV_API_KEY")

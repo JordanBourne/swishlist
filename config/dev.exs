@@ -80,4 +80,6 @@ config :swishlist, Swishlist.Mailer, adapter: Swoosh.Adapters.Local
 config :swoosh, :api_client, false
 
 config :moov_elixir_sdk,
-  api_key: System.get_env("MOOV_API_KEY")
+  moov_public_key: System.get_env("MOOV_PUBLIC_KEY"),
+  moov_private_key: System.get_env("MOOV_PRIVATE_KEY"),
+  http_client: HTTPoison

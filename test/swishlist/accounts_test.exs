@@ -505,12 +505,4 @@ defmodule Swishlist.AccountsTest do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
     end
   end
-
-  describe "get_user_payment_account/1" do
-    test "returns :ok" do
-      assert {:ok, _} =
-               user_fixture()
-               |> Accounts.get_user_payment_account()
-    end
-  end
 end

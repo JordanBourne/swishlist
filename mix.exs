@@ -55,7 +55,8 @@ defmodule Swishlist.MixProject do
       {:swoosh, "~> 1.16"},
       {:gen_smtp, "~> 1.2"},
       {:hackney, "~> 1.20"},
-      {:moov_elixir_sdk, path: "../moov_elixir_sdk"}
+      {:moov_elixir_sdk, "~> 0.1.0"},
+      {:mox, "~> 1.0", only: :test}
     ]
   end
 

@@ -35,4 +35,6 @@ config :logger, level: :warning
 config :phoenix, :plug_init_mode, :runtime
 
 config :moov_elixir_sdk,
-  api_key: System.get_env("MOOV_API_KEY")
+  moov_public_key: System.get_env("MOOV_PUBLIC_KEY"),
+  moov_private_key: System.get_env("MOOV_PRIVATE_KEY"),
+  http_client: HTTPoison

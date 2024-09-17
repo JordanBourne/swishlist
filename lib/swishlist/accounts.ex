@@ -22,7 +22,7 @@ defmodule Swishlist.Accounts do
     * `get_user_by_session_token/1` - Gets the user with a given signed token.
     * `delete_user_session_token/1` - Deletes a signed token with a given context.
     * `deliver_user_confirmation_instructions/2` - Delivers confirmation email instructions to a user.
-    * `confirm_user/1` - Confirms a user by a given token.
+    * `confirm_user/1` - Confirms auser by a given token.
     * `deliver_user_reset_password_instructions/2` - Delivers reset password email to a user.
     * `get_user_by_reset_password_token/1` - Gets the user by reset password token.
     * `reset_user_password/2` - Resets the user password.
@@ -443,8 +443,34 @@ defmodule Swishlist.Accounts do
     end
   end
 
-  @spec get_user_payment_account(user :: User.t()) :: :ok
-  def get_user_payment_account(user) do
-    MoovElixirSdk.health()
+  @spec create_moov_account(user :: User.t()) :: :ok
+  def create_moov_account(user) do
+    account = %{
+      "email" => user.email,
+      "foreignID" => Integer.to_string(user.id),
+      "name" => %{
+        "firstName" => user.first_name,
+        "lastName" => user.last_name
+      }
+    }
+
+    account
+    |> MoovElixirSdk.create_individual_account()
+    |> case do
+      {:ok, response} -> {:ok, response}
+      {:error, error} -> {:error, error}
+    end
   end
 end
+
+# %{
+#   "email" => "test@example.com",
+#   "foreignID" => "1234567891",
+#   "name" => %{"firstName" => "Test", "lastName" => "Customer"}
+# }
+
+# %{
+#   "email" => "user-576460752303423483@example.com",
+#   "foreignID" => 8270,
+#   "name" => %{"firstName" => "Tom", "lastName" => "Bombadil"}
+# }
